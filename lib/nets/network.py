@@ -38,6 +38,26 @@ from nets.discriminator_img import FCDiscriminator_img
 from nets.decoder import decoder
 import cv2
 from model.bbox_transform import bbox_transform_inv
+class DiffLoss(nn.Module):
+
+    def __init__(self):
+        super(DiffLoss, self).__init__()
+
+    def forward(self, input1, input2):
+
+        batch_size = input1.size(0)
+        input1 = input1.view(batch_size, -1)
+        input2 = input2.view(batch_size, -1)
+
+        input1_l2_norm = torch.norm(input1, p=2, dim=1, keepdim=True).detach()
+        input1_l2 = input1.div(input1_l2_norm.expand_as(input1) + 1e-6)
+
+        input2_l2_norm = torch.norm(input2, p=2, dim=1, keepdim=True).detach()
+        input2_l2 = input2.div(input2_l2_norm.expand_as(input2) + 1e-6)
+
+        diff_loss = torch.mean((input1_l2.mm(input2_l2.t()).pow(2)))
+
+        return diff_loss
 
 class GradReverse(torch.autograd.Function):
     @staticmethod
@@ -280,7 +300,7 @@ class Network(nn.Module):
       rois, _ = self._proposal_target_layer(rois, roi_scores)
     else:
       if cfg.TEST.MODE == 'nms':
-        rois, _ = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred)
+        rois, self.roi_scores = self._proposal_layer(rpn_cls_prob, rpn_bbox_pred)
       elif cfg.TEST.MODE == 'top':
         rois, _ = self._proposal_top_layer(rpn_cls_prob, rpn_bbox_pred)
       else:
@@ -348,8 +368,10 @@ class Network(nn.Module):
     #discriminator for instance and image level
     self.D_inst = FCDiscriminator_inst(4096)
     self.D_img = FCDiscriminator_img(self._net_conv_channels)
+    # self.D_img2 = FCDiscriminator_img(self._net_conv_channels)
+    # self.D_img_domain = FCDiscriminator_img(self._net_conv_channels)
 
-    self.decoder = decoder(self._net_conv_channels)
+    # self.decoder = decoder(self._net_conv_channels)
 
     self.init_weights()
 
@@ -387,6 +409,10 @@ class Network(nn.Module):
     torch.backends.cudnn.benchmark = False
     net_conv = self._image_to_head()
 
+    ##
+    #net_conv2 = self._image_to_head_branch()
+    #self.domain_feat = net_conv2
+
     # build the anchors for the image
     self._anchor_component(net_conv.size(2), net_conv.size(3))
    
@@ -397,7 +423,7 @@ class Network(nn.Module):
       pool5 = self._roi_pool_layer(net_conv, rois)
 
     if self._mode == 'TRAIN':
-      pass#torch.backends.cudnn.benchmark = True # benchmark because now the input size are fixed
+      torch.backends.cudnn.benchmark = True # benchmark because now the input size are fixed
     fc7 = self._head_to_tail(pool5)
 
     cls_prob, bbox_pred = self._region_classification(fc7)
@@ -455,42 +481,34 @@ class Network(nn.Module):
     #     pred_boxes = np.tile(boxes, (1, scores.shape[1]))
     #   inds = []
     #   if len(gt_boxes) > 0:
-    #     for j in range(2):
-    #       for idx, bb in enumerate(pred_boxes[:,j*4:(j+1)*4]):
-    #         ixmin = np.maximum(gt_boxes[:, 0], bb[0])
-    #         iymin = np.maximum(gt_boxes[:, 1], bb[1])
-    #         ixmax = np.minimum(gt_boxes[:, 2], bb[2])
-    #         iymax = np.minimum(gt_boxes[:, 3], bb[3])
-    #         iw = np.maximum(ixmax - ixmin + 1., 0.)
-    #         ih = np.maximum(iymax - iymin + 1., 0.)
-    #         inters = iw * ih
+    #     j = 1 #class 'car'
+    #     for idx, bb in enumerate(pred_boxes[:,j*4:(j+1)*4]):
+    #       ixmin = np.maximum(gt_boxes[:, 0], bb[0])
+    #       iymin = np.maximum(gt_boxes[:, 1], bb[1])
+    #       ixmax = np.minimum(gt_boxes[:, 2], bb[2])
+    #       iymax = np.minimum(gt_boxes[:, 3], bb[3])
+    #       iw = np.maximum(ixmax - ixmin + 1., 0.)
+    #       ih = np.maximum(iymax - iymin + 1., 0.)
+    #       inters = iw * ih
 
-    #         # union
-    #         uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
-    #                (gt_boxes[:, 2] - gt_boxes[:, 0] + 1.) *
-    #                (gt_boxes[:, 3] - gt_boxes[:, 1] + 1.) - inters)
+    #       # union
+    #       uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
+    #              (gt_boxes[:, 2] - gt_boxes[:, 0] + 1.) *
+    #              (gt_boxes[:, 3] - gt_boxes[:, 1] + 1.) - inters)
 
-    #         overlaps = inters / uni
-    #         ovmax = np.max(overlaps)
-    #         jmax = np.argmax(overlaps)
-            
-    #         if ovmax > 0.5:
-    #           inds.append(idx)
-    #   # if len(inds) == 0:
-    #   #   scores = np.reshape(cls_prob.data.cpu().numpy(), [cls_prob.shape[0], -1])
-    #   #   sorted_args = np.argsort(scores[:,0])
-    #   #   inds = sorted_args[-10:]
+    #       overlaps = inters / uni
+    #       ovmax = np.max(overlaps)
+    #       jmax = np.argmax(overlaps)
+          
+    #       if ovmax < 0.5:
+    #         inds.append(idx)
 
     #   return fc7, net_conv, np.asarray(list(set(inds)))
-    # # if not adapt and mode != "TEST":
-    # #   scores = np.reshape(cls_prob.data.cpu().numpy(), [cls_prob.shape[0], -1])
-    # #   inds = np.where(np.logical_and(scores[:,1] > scores[:,0], scores[:,1] > 0.5))[0]
-    # #   # print(inds.shape, 'S')
-    # #   return fc7, net_conv, inds
+
     # elif mode != "TEST":
     #   scores = np.reshape(cls_prob.data.cpu().numpy(), [cls_prob.shape[0], -1])
     #   #keep car prediction
-    #   inds = np.where(scores[:,1] > 0.5)[0]
+    #   inds = np.where(scores[:,1] < 0.5)[0]
     #   # print(inds.shape, 'T')
     #   return fc7, net_conv, inds
 
@@ -524,6 +542,16 @@ class Network(nn.Module):
     normal_init(self.D_img.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
     normal_init(self.D_img.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
 
+    # normal_init(self.D_img2.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img2.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img2.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img2.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
+
+    # normal_init(self.D_img_domain.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img_domain.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img_domain.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    # normal_init(self.D_img_domain.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
+
   # Extract the head feature maps, for example for vgg16 it is conv5_3
   # only useful during testing mode
   def extract_head(self, image):
@@ -538,9 +566,10 @@ class Network(nn.Module):
                                                      self._predictions['cls_prob'].data.cpu().numpy(), \
                                                      self._predictions['bbox_pred'].data.cpu().numpy(), \
                                                      self._predictions['rois'].data.cpu().numpy()
-    im = self.decoder(net_conv)
-    im = (im[0].cpu().data.numpy() * 255).astype(np.uint8).transpose([1,2,0])
-    #cv2.imwrite('./test.png', im)
+    # im = self.decoder(net_conv)
+    # im = (im[0].cpu().data.numpy() * 255).astype(np.uint8).transpose([1,2,0])
+    # cv2.imwrite('./test.png', im)
+
     return cls_score, cls_prob, bbox_pred, rois, fc7, net_conv
 
   def delete_intermediate_states(self):
@@ -556,6 +585,128 @@ class Network(nn.Module):
     summary = self._run_summary_op(True)
 
     return summary
+
+  def train_adapt_step_branch(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op, D_img_branch_op):
+    source_label = 0
+    target_label = 1
+
+    train_op.zero_grad()
+    # D_inst_op.zero_grad()
+    D_img_op.zero_grad()
+    D_img_branch_op.zero_grad()
+    
+    # sig = nn.Sigmoid()
+    bceLoss_func = nn.BCEWithLogitsLoss()
+    diffLoss = DiffLoss()
+    # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
+    # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
+
+    #train with source
+    fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # fc7 = grad_reverse(fc7)
+    
+    ##diff loss with domain feat
+    loss_diff_S = diffLoss(net_conv, self.domain_feat)
+
+    net_conv = grad_reverse(net_conv)
+    # net_conv = interp_S(net_conv)
+    #det loss
+    loss_S = self._losses['total_loss']
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+
+    D_img_domain_out = self.D_img_domain(self.domain_feat)
+    loss_D_img_domain_S = bceLoss_func(D_img_domain_out, Variable(torch.FloatTensor(D_img_domain_out.data.size()).fill_(source_label)).cuda())
+    
+    total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_S + loss_diff_S + loss_D_img_domain_S)#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    #total_loss_S.backward()
+
+    # print("S")
+    # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
+
+    rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
+                                                                        self._losses['rpn_loss_box'].data[0], \
+                                                                        self._losses['cross_entropy'].data[0], \
+                                                                        self._losses['loss_box'].data[0], \
+                                                                        self._losses['total_loss'].data[0]
+    #train with target
+    fc7, net_conv = self.forward(blobs_T['data'], blobs_T['im_info'], blobs_T['gt_boxes'], adapt=True)
+    ##diff loss with domain feat
+    loss_diff_T = diffLoss(net_conv, self.domain_feat)
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # self.vgg.features[28].register_backward_hook(printgradnorm)
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+    # net_conv = interp_T(net_conv)
+
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+    #self.D_img.conv3.register_backward_hook(printgradnorm)
+    #loss
+    # loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(target_label)).cuda()) 
+    loss_D_img_T = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_T = Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_T += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_T /= sig_D_inst_out.size()[0]
+
+    D_img_domain_out = self.D_img_domain(self.domain_feat)
+    loss_D_img_domain_T = bceLoss_func(D_img_domain_out, Variable(torch.FloatTensor(D_img_domain_out.data.size()).fill_(target_label)).cuda())
+
+    total_loss_T = (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_T + loss_diff_T + loss_D_img_domain_T)#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+    #total_loss_T.backward()
+
+    total_loss = total_loss_S + total_loss_T
+    total_loss.backward()
+    
+    #clip gradient
+    # clip = 100
+    # torch.nn.utils.clip_grad_norm(self.D_inst.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.D_img.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
+
+    # print("T")
+    # print(loss_D_inst_T.data[0], loss_D_img_T.data[0], loss_D_const_T.data[0], mean.data[0], target_label)
+
+
+    train_op.step()
+    # D_inst_op.step()
+    D_img_op.step()
+    D_img_branch_op.step()
+                                                                        
+    self.delete_intermediate_states()
+
+    loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
+    # loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
+
+    # loss_D_const_S, loss_D_const_T = 0, 0
+    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T
+
   def train_focus_inst_adapt_step(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
     source_label = 0
     target_label = 1
@@ -574,11 +725,8 @@ class Network(nn.Module):
       loss_D_inst_S = 0
       print('skipS')
     else:
-      # fc7 = fc7.detach()
-      # net_conv = net_conv.detach()
-      # fc7 = grad_reverse(fc7)
-      net_conv = grad_reverse(net_conv)
-      #det loss
+      fc7 = grad_reverse(fc7)
+
       #D_inst
       D_inst_out = self.D_inst(fc7)[keep_inds]
 
@@ -603,15 +751,11 @@ class Network(nn.Module):
       loss_D_inst_T = 0
       print("skipT")
     else:
-      # fc7 = fc7.detach()
-      # net_conv = net_conv.detach()
-      #self.vgg.features[28].register_backward_hook(printgradnorm)
       fc7 = grad_reverse(fc7)
 
       #D_inst
       D_inst_out = self.D_inst(fc7)[keep_inds]
 
-      #self.D_img.conv3.register_backward_hook(printgradnorm)
       #loss
       loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(target_label)).cuda()) 
 
@@ -640,7 +784,163 @@ class Network(nn.Module):
     # loss_D_const_S, loss_D_const_T = 0, 0
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
 
-  def train_adapt_step(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
+  def train_adapt_step_SST(self, blobs_S, blobs_T, blobs_synth, train_op, D_inst_op, D_img_op, D_img2_op):
+    source_label = 0
+    target_label = 1
+
+    train_op.zero_grad()
+    # D_inst_op.zero_grad()
+    D_img_op.zero_grad()
+    D_img2_op.zero_grad()
+    
+    # sig = nn.Sigmoid()
+    bceLoss_func = nn.BCEWithLogitsLoss()
+    # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
+    # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
+
+    #train with source
+    fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_S(net_conv)
+    #det loss
+    loss_S = self._losses['total_loss']
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+    
+    total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * loss_D_img_S#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    # total_loss_S.backward()
+
+    # print("S")
+    # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
+
+    rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
+                                                                        self._losses['rpn_loss_box'].data[0], \
+                                                                        self._losses['cross_entropy'].data[0], \
+                                                                        self._losses['loss_box'].data[0], \
+                                                                        self._losses['total_loss'].data[0]
+
+    #train with synthetic source
+    fc7, net_conv = self.forward(blobs_synth['data'], blobs_synth['im_info'], blobs_synth['gt_boxes'])
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_S(net_conv)
+    #det loss
+    loss_synth = self._losses['total_loss']
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    D_img2_out = self.D_img2(net_conv)
+
+    #loss
+    # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_synth = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    loss_D_img2_synth = bceLoss_func(D_img2_out, Variable(torch.FloatTensor(D_img2_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+    
+    total_loss_synth = loss_synth + (cfg.ADAPT_LAMBDA/2.) * loss_D_img_synth + (cfg.ADAPT_LAMBDA/2.) * loss_D_img2_synth#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    # total_loss_S.backward()
+
+    # print("S")
+    # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
+
+    rpn_loss_cls_synth, rpn_loss_box_synth, loss_cls_synth, loss_box_synth, loss_synth = self._losses["rpn_cross_entropy"].data[0], \
+                                                                        self._losses['rpn_loss_box'].data[0], \
+                                                                        self._losses['cross_entropy'].data[0], \
+                                                                        self._losses['loss_box'].data[0], \
+                                                                        self._losses['total_loss'].data[0]
+
+    #train with target
+    fc7, net_conv = self.forward(blobs_T['data'], blobs_T['im_info'], blobs_T['gt_boxes'], adapt=True)
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # self.vgg.features[28].register_backward_hook(printgradnorm)
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_T(net_conv)
+
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img2(net_conv)
+    #self.D_img.conv3.register_backward_hook(printgradnorm)
+    #loss
+    # loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(target_label)).cuda()) 
+    loss_D_img_T = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_T = Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_T += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_T /= sig_D_inst_out.size()[0]
+
+    total_loss_T = (cfg.ADAPT_LAMBDA/2.) * loss_D_img_T#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+    #total_loss_T.backward()
+
+    total_loss = total_loss_S + total_loss_T + total_loss_synth
+    total_loss.backward()
+    
+    #clip gradient
+    # clip = 100
+    # torch.nn.utils.clip_grad_norm(self.D_inst.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.D_img.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
+
+    # print("T")
+    # print(loss_D_inst_T.data[0], loss_D_img_T.data[0], loss_D_const_T.data[0], mean.data[0], target_label)
+
+
+    train_op.step()
+    # D_inst_op.step()
+    D_img_op.step()
+    D_img2_op.step()
+                                                                        
+    self.delete_intermediate_states()
+
+    loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
+    # loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
+
+    # loss_D_const_S, loss_D_const_T = 0, 0
+    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T, \
+           rpn_loss_cls_synth, rpn_loss_box_synth, loss_cls_synth, loss_box_synth, loss_synth, loss_D_img_synth, loss_D_img2_synth
+
+  def train_adapt_step_inst(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
     source_label = 0
     target_label = 1
 
@@ -659,6 +959,7 @@ class Network(nn.Module):
     # net_conv = net_conv.detach()
     fc7 = grad_reverse(fc7)
     # net_conv = grad_reverse(net_conv)
+
     # net_conv = interp_S(net_conv)
     #det loss
     loss_S = self._losses['total_loss']
@@ -681,7 +982,7 @@ class Network(nn.Module):
     # loss_D_const_S /= sig_D_inst_out.size()[0]
     
     total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * loss_D_inst_S#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
-    #total_loss_S.backward()
+    # total_loss_S.backward()
 
     # print("S")
     # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
@@ -698,11 +999,12 @@ class Network(nn.Module):
     # self.vgg.features[28].register_backward_hook(printgradnorm)
     fc7 = grad_reverse(fc7)
     # net_conv = grad_reverse(net_conv)
+
     # net_conv = interp_T(net_conv)
 
     #D_inst
     D_inst_out = self.D_inst(fc7)
-    #D_img
+    # D_img
     # D_img_out = self.D_img(net_conv)
     #self.D_img.conv3.register_backward_hook(printgradnorm)
     #loss
@@ -725,9 +1027,10 @@ class Network(nn.Module):
     total_loss.backward()
     
     #clip gradient
-    # clip = 5
+    # clip = 100
     # torch.nn.utils.clip_grad_norm(self.D_inst.parameters(),clip)
     # torch.nn.utils.clip_grad_norm(self.D_img.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
 
     # print("T")
     # print(loss_D_inst_T.data[0], loss_D_img_T.data[0], loss_D_const_T.data[0], mean.data[0], target_label)
@@ -741,6 +1044,115 @@ class Network(nn.Module):
 
     # loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
     loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
+
+    # loss_D_const_S, loss_D_const_T = 0, 0
+    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
+
+
+  def train_adapt_step_img(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
+    source_label = 0
+    target_label = 1
+
+    train_op.zero_grad()
+    # D_inst_op.zero_grad()
+    D_img_op.zero_grad()
+    
+    # sig = nn.Sigmoid()
+    bceLoss_func = nn.BCEWithLogitsLoss()
+    # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
+    # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
+
+    #train with source
+    fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_S(net_conv)
+    #det loss
+    loss_S = self._losses['total_loss']
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+    
+    total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * loss_D_img_S#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    # total_loss_S.backward()
+
+    # print("S")
+    # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
+
+    rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
+                                                                        self._losses['rpn_loss_box'].data[0], \
+                                                                        self._losses['cross_entropy'].data[0], \
+                                                                        self._losses['loss_box'].data[0], \
+                                                                        self._losses['total_loss'].data[0]
+    #train with target
+    fc7, net_conv = self.forward(blobs_T['data'], blobs_T['im_info'], blobs_T['gt_boxes'], adapt=True)
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # self.vgg.features[28].register_backward_hook(printgradnorm)
+    # fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_T(net_conv)
+
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+    #self.D_img.conv3.register_backward_hook(printgradnorm)
+    #loss
+    # loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(target_label)).cuda()) 
+    loss_D_img_T = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_T = Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_T += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_T /= sig_D_inst_out.size()[0]
+
+    total_loss_T = (cfg.ADAPT_LAMBDA/2.) * loss_D_img_T#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+    #total_loss_T.backward()
+
+    total_loss = total_loss_S + total_loss_T
+    total_loss.backward()
+    
+    #clip gradient
+    # clip = 100
+    # torch.nn.utils.clip_grad_norm(self.D_inst.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.D_img.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
+
+    # print("T")
+    # print(loss_D_inst_T.data[0], loss_D_img_T.data[0], loss_D_const_T.data[0], mean.data[0], target_label)
+
+
+    train_op.step()
+    # D_inst_op.step()
+    D_img_op.step()
+                                                                        
+    self.delete_intermediate_states()
+
+    loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
+    # loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
 
     # loss_D_const_S, loss_D_const_T = 0, 0
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
@@ -841,6 +1253,10 @@ class Network(nn.Module):
     loss_D_T = loss_D_img_T / 2.#(loss_D_inst_T + loss_D_img_T + loss_D_const_T) / 2.
     loss_D_T.backward()
 
+    #clip gradient
+    # clip = 5
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
+
     train_op.step()
     # D_inst_op.step()
     D_img_op.step()
@@ -848,36 +1264,128 @@ class Network(nn.Module):
     loss_D_inst_T, loss_D_inst_S, loss_D_inst_adv_T, loss_D_const_adv_T, loss_D_const_T, loss_D_const_S = 0, 0, 0, 0, 0, 0
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T, loss_D_inst_adv_T, loss_D_img_adv_T, loss_D_const_adv_T
   
-  def train_reconstruct_step(self, blobs, train_op, decoder_op):
-    fc7, net_conv = self.forward(blobs['data'], blobs['im_info'], blobs['gt_boxes'])
+  def train_reconstruct_step(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op, D_img_branch_op, decoder_op):
+    source_label = 0
+    target_label = 1
+    #utils.timer.timer.tic('backward')
+    train_op.zero_grad()
+    decoder_op.zero_grad()
+    D_img_op.zero_grad()
+    # D_img_branch_op.zero_grad()
+
+    content_loss = nn.MSELoss()
+    bceLoss_func = nn.BCEWithLogitsLoss()
+    diffLoss = DiffLoss()
+
+    fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
 
     rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
                                                                         self._losses['rpn_loss_box'].data[0], \
                                                                         self._losses['cross_entropy'].data[0], \
                                                                         self._losses['loss_box'].data[0], \
                                                                         self._losses['total_loss'].data[0]
-    recon = self.decoder(net_conv)
-    image = cv2.imread(blobs['data_path'][0])
+    net_conv_domain = self.domain_feat
+    net_conv_add = net_conv + net_conv_domain
+
+    recon = self.decoder(net_conv_add)
+
+    image = cv2.imread(blobs_S['data_path'][0])
     image = image.astype(np.float32, copy=False)
     image = cv2.resize(image, recon.shape[-2:])
     image = image / 255.
     image = Variable(torch.from_numpy(np.array([image.transpose([2,0,1])])).cuda(), volatile=True)
-    loss = nn.L1Loss()
 
-    recon_loss = loss(recon, image)
-    #utils.timer.timer.tic('backward')
-    train_op.zero_grad()
-    decoder_op.zero_grad()
+    recon_loss_S = content_loss(recon, image)
+    loss_diff_S = diffLoss(net_conv, net_conv_domain)
+
+    net_conv = grad_reverse(net_conv)
+    #det loss
+    loss_S = self._losses['total_loss']
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+
+    # D_img_domain_out = self.D_img_domain(self.domain_feat)
+    # loss_D_img_domain_S = bceLoss_func(D_img_domain_out, Variable(torch.FloatTensor(D_img_domain_out.data.size()).fill_(source_label)).cuda())
     
-    loss = self._losses['total_loss'] + recon_loss
+    total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_S) + loss_diff_S + recon_loss_S#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    # total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_S + loss_D_img_domain_S) + loss_diff_S + recon_loss_S#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+
+
+
+    fc7, net_conv = self.forward(blobs_T['data'], blobs_T['im_info'], blobs_T['gt_boxes'])
+
+    net_conv_domain = self.domain_feat
+    net_conv_add = net_conv + net_conv_domain
+
+    recon = self.decoder(net_conv_add)
+
+    image = cv2.imread(blobs_T['data_path'][0])
+    image = image.astype(np.float32, copy=False)
+    image = cv2.resize(image, recon.shape[-2:])
+    image = image / 255.
+    image = Variable(torch.from_numpy(np.array([image.transpose([2,0,1])])).cuda(), volatile=True)
+
+    recon_loss_T = content_loss(recon, image)
+    loss_diff_T = diffLoss(net_conv, net_conv_domain)
+
+    net_conv = grad_reverse(net_conv)
+
+    #D_inst
+    # D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    # loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_T = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_T =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_T += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_T /= sig_D_inst_out.size()[0]
+
+    # D_img_domain_out = self.D_img_domain(self.domain_feat)
+    # loss_D_img_domain_T = bceLoss_func(D_img_domain_out, Variable(torch.FloatTensor(D_img_domain_out.data.size()).fill_(target_label)).cuda())
+    
+    total_loss_T = (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_T) + loss_diff_T + recon_loss_T#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+    # total_loss_T = (cfg.ADAPT_LAMBDA/2.) * (loss_D_img_T + loss_D_img_domain_T) + loss_diff_T + recon_loss_T#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+
+    
+    loss = total_loss_S + total_loss_T
     loss.backward()
     #utils.timer.timer.toc('backward')
     train_op.step()
     decoder_op.step()
+    D_img_op.step()
+    # D_img_branch_op.step()
 
     self.delete_intermediate_states()
 
-    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, recon_loss
+    loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T, loss_D_img_domain_S, loss_D_img_domain_T = 0, 0, 0, 0, 0, 0
+    # loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
+    # loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
+
+    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T, loss_diff_S, loss_diff_T,\
+           loss_D_img_domain_S, loss_D_img_domain_T, recon_loss_S, recon_loss_T
 
   def train_step(self, blobs, train_op):
     self.forward(blobs['data'], blobs['im_info'], blobs['gt_boxes'])
@@ -937,7 +1445,7 @@ class Network(nn.Module):
     netDict = self.state_dict()
     # print(netDict.keys())
     stateDict = {k: v for k, v in state_dict.items() if k in netDict}
-    netDict.update(state_dict)
+    netDict.update(stateDict)
     nn.Module.load_state_dict(self, netDict)
 
     # nn.Module.load_state_dict(self, {k: state_dict[k] for k in list(self.state_dict())})

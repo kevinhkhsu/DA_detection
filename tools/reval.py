@@ -70,3 +70,4 @@ if __name__ == '__main__':
   output_dir = os.path.abspath(args.output_dir[0])
   imdb_name = args.imdb_name
   from_dets(imdb_name, output_dir, args)
+  os.system("mv ./pr/pr.png ./pr/%s.png" % args.output_dir[0][args.output_dir[0].rfind('/')+1:][18:])

@@ -38,7 +38,7 @@ case ${DATASET} in
     ;;
   KITTI)
     TRAIN_IMDB="KITTI_train"
-    TEST_IMDB="cityscapes_val"
+    TEST_IMDB="KITTI_val"
     STEPSIZE="[350000]"
     ITERS=490000
     ANCHORS="[4,8,16,32]"

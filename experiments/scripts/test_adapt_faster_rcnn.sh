@@ -17,17 +17,17 @@ EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 case ${DATASET} in
   KITTI)
     TRAIN_IMDB_S="KITTI_train"
-    TRAIN_IMDB_T="cityscapes_train"
+    TRAIN_IMDB_T="KITTI_fake"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
-    ITERS=65000
+    ITERS=50000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
     TRAIN_IMDB_S="cityscapes_train"
     TRAIN_IMDB_T="KITTI_train"
-    TEST_IMDB="KITTY_val"
+    TEST_IMDB="KITTI_val"
     STEPSIZE="[50000]"
     ITERS=30000
     ANCHORS="[8,16,32]"
@@ -47,9 +47,8 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_GRL_img_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_imnet_iter_${ITERS}.pth
 fi
-set -x
 
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/test_net.py \

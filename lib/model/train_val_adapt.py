@@ -139,7 +139,9 @@ class SolverWrapper(object):
     for key, value in dict(self.net.named_parameters()).items():
       if 'D_inst' in key or 'D_img' in key or 'decoder' in key:
         continue
+
       if value.requires_grad:
+        print(key)
         if 'bias' in key:
           params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
         else:
@@ -148,10 +150,12 @@ class SolverWrapper(object):
 
     self.D_inst_op = torch.optim.SGD(self.net.D_inst.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
     self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+    # self.D_img_branch_op = torch.optim.SGD(self.net.D_img_domain.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+
     # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/4., betas=(0.9, 0.99))
     # self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/4., betas=(0.9, 0.99))
 
-    self.decoder_op = torch.optim.Adam(self.net.decoder.parameters(), lr=0.0001, betas=(0.9, 0.99))
+    # self.decoder_op = torch.optim.Adam(self.net.decoder.parameters(), lr=0.0001, betas=(0.9, 0.99))
     # Write the train and validation information to tensorboard
     self.writer = tb.writer.FileWriter(self.tbdir)
     self.valwriter = tb.writer.FileWriter(self.tbvaldir)
@@ -283,7 +287,7 @@ class SolverWrapper(object):
       if False: 
         # Compute the graph with summary
         rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, summary = \
-          self.net.train_adapt_step_with_summary(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)
+          self.net.train_adapt_step_with_summary(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         for _sum in summary: self.writer.add_summary(_sum, float(iter))
         # Also check the summary on the validation set
         blobs_val = self.data_layer_val.forward()
@@ -293,13 +297,18 @@ class SolverWrapper(object):
       else:
         # Compute the graph without summary
         rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)
+          self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)  
+        #   self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \
-        #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, recon_loss = \
-        #   self.net.train_reconstruct_step(blobs, self.optimizer, self.decoder_op)
+        #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T, \
+        #   recon_loss_S, recon_loss_T = \
+        #   self.net.train_reconstruct_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op, self.decoder_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T = \
+        #   self.net.train_adapt_step_branch(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op)
       utils.timer.timer.toc()
 
       # total_loss += D_inst_loss_S + D_img_loss_S + D_const_loss_S + D_inst_loss_T + D_img_loss_T + D_const_loss_T
@@ -310,15 +319,18 @@ class SolverWrapper(object):
               # '>>> D_img_loss_adv_T: %.6f\n >>> D_inst_loss_adv_T: %.6f\n >>> D_const_loss_adv_T: %.6f\n '
               '>>> D_img_loss_S: %.6f\n >>> D_inst_loss_S: %.6f\n >>> D_const_loss_S: %.6f\n '
               '>>> D_img_loss_T: %.6f\n >>> D_inst_loss_T: %.6f\n >>> D_const_loss_T: %.6f\n '
-              '>>> lambda: %f >>> lr: %f ' %\
-              #'>>> ADAM_lr: %f' % \
+              # '>>> D_img_domain_loss_S: %.6f\n >>> D_img_domain_loss_T: %.6f\n >>> loss_diff_S: %.6f\n >>> loss_diff_T: %.6f\n'
+              # '>>> recon_loss_S: %.6f\n >>> recon_loss_T: %.6f\n'
+              '>>> lambda: %f >>> lr: %f ' % \
+              # '>>> ADAM_lr: %f' % \
               # '>>> recon_loss: %.6f\n >>> lr: %f' % \
               (iter, max_iters, total_loss, rpn_loss_cls, \
                 rpn_loss_box, loss_cls, loss_box, \
                 # D_img_loss_adv_T, D_inst_loss_adv_T, D_const_loss_adv_T, \
                 D_img_loss_S, D_inst_loss_S, D_const_loss_S, \
-                D_img_loss_T, D_inst_loss_T, D_const_loss_T,\
-                # recon_loss, \
+                D_img_loss_T, D_inst_loss_T, D_const_loss_T, \
+                # loss_D_img_domain_S, loss_D_img_domain_T, loss_diff_S, loss_diff_T, \
+                # recon_loss_S, recon_loss_T, \
                 cfg.ADAPT_LAMBDA, lr))#, lr/4.))
         print('speed: {:.3f}s / iter'.format(utils.timer.timer.average_time()))
 

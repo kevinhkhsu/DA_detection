@@ -215,6 +215,7 @@ def voc_eval(detpath,
     BB = BB[sorted_ind, :]
     image_ids = [image_ids[x] for x in sorted_ind]
 
+    tp_ALL = 0
     # go down dets and mark TPs and FPs
     for d in range(nd):
       R = class_recs[image_ids[d]]
@@ -244,6 +245,7 @@ def voc_eval(detpath,
 
       if ovmax > ovthresh:
         if not R['difficult'][jmax]:
+          tp_ALL += 1
           if not R['det'][jmax]:
             tp[d] = 1.
             R['det'][jmax] = 1
@@ -260,5 +262,5 @@ def voc_eval(detpath,
   # ground truth
   prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
   ap = voc_ap(rec, prec, use_07_metric)
-
-  return rec, prec, ap
+  print(tp_ALL, float(nd))
+  return rec, prec, ap, tp_ALL/float(nd)

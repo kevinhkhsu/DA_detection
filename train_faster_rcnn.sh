@@ -40,7 +40,7 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   KITTI)
-    TRAIN_IMDB="KITTI_train"
+    TRAIN_IMDB="KITTI_fakereal"
     TEST_IMDB="KITTI_val"
     STEPSIZE="[350000]"
     ITERS=490000

@@ -42,12 +42,12 @@ for year in ['2015']:
     __sets[name] = (lambda split=split, year=year: coco(split, year))
 
 # Set up KITTI
-for split in ['train', 'val']:
+for split in ['train', 'val', 'fake', 'fakereal']:
   name = 'KITTI_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: KITTI(split))
 
 # Set up cityscapes
-for split in ['train', 'val']:
+for split in ['train', 'val', 'fake']:
   name = 'cityscapes_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: cityscapes(split))
 

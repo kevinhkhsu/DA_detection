@@ -67,6 +67,11 @@ class KITTI(imdb):
     """
     image_path = os.path.join(self._data_path, 'image_2',
                               index + self._image_ext)
+    if self._image_set == 'fake':
+      image_path = os.path.join(self._data_path, 'fake_image_2',
+                              index + self._image_ext)
+    if self._image_set == 'fakereal':
+      image_path = os.path.join(self._data_path, 'fakereal', index + self._image_ext)
     assert os.path.exists(image_path), \
       'Path does not exist: {}'.format(image_path)
     return image_path
@@ -233,6 +238,7 @@ class KITTI(imdb):
       self._image_set + '.txt')
     cachedir = os.path.join(self._devkit_path, 'annotations_cache')
     aps = []
+    rc = []
     # The PASCAL VOC metric changed in 2010
     use_07_metric = False#True if int(self._year) < 2010 else False
     print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
@@ -242,13 +248,14 @@ class KITTI(imdb):
       if cls == '__background__':
         continue
       filename = self._get_voc_results_file_template().format(cls)
-      rec, prec, ap = voc_eval(
+      rec, prec, ap, rec_ALL = voc_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
       pl.plot(rec, prec, lw=2, 
               label='Precision-recall curve of class {} (ap = {:.4f})'
               ''.format(cls, ap))
       aps += [ap]
+      rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
@@ -264,6 +271,7 @@ class KITTI(imdb):
     plt.savefig('./pr.png')
 
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
+    print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:

@@ -222,7 +222,8 @@ class cityscapes(imdb):
     # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
     filename = self._get_comp_id() + '_det_' + self._image_set + '_{:s}.txt'
     path = os.path.join(
-      self._devkit_path,
+      #self._devkit_path,
+      './',
       'results',
       'Main',
       filename)
@@ -256,6 +257,7 @@ class cityscapes(imdb):
     imagesetfile = self._image_index
     cachedir = os.path.join(self._devkit_path, 'annotations_cache')
     aps = []
+    rc = []
     # The PASCAL VOC metric changed in 2010
     use_07_metric = False#True if int(self._year) < 2010 else False
     print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
@@ -265,6 +267,7 @@ class cityscapes(imdb):
       if cls == '__background__':
         continue
       filename = self._get_voc_results_file_template().format(cls)
+      ##rec_ALL is counting every predicted tp boxes (including overlaps)
       rec, prec, ap = cityscapes_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
@@ -272,6 +275,7 @@ class cityscapes(imdb):
               label='Precision-recall curve of class {} (ap = {:.4f})'
               ''.format(cls, ap))
       aps += [ap]
+      rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
@@ -284,9 +288,10 @@ class cityscapes(imdb):
     pl.title('Precision-Recall')
     pl.legend(loc="upper right")     
     # plt.show()
-    plt.savefig('./pr.png')
+    plt.savefig('./pr/pr.png')
 
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
+    print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:
