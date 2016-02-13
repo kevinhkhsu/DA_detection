@@ -37,14 +37,16 @@ class cityscapes(imdb):
     self._devkit_path = self._get_default_path()
     self._data_path = os.path.join(self._devkit_path)
     self._classes = ('__background__',  # always index 0
-                     'person',
-                     'rider',
+                     #'person',
+                     #'rider',
                      'car',
-                     'truck',
-                     'bus',
-                     'train',
-                     'motorcycle',
-                     'bicycle')
+                     #'truck',
+                     #'bus',
+                     #'train',
+                     #'motorcycle',
+                     #'bicycle',
+                      )
+    print('Num Classes:', len(self._classes))
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
     self._image_ext = '.png'
     self._image_index = self._load_image_set_index()
@@ -69,15 +71,8 @@ class cityscapes(imdb):
     """
     Return the absolute path to image i in the image sequence.
     """
-    ending = 'leftImg8bit'
-    if 'foggy' in self._image_set:
-      if (i % 3) == 0:
-        ending += '_foggy_beta_0.005'
-      elif (i % 3) == 1:
-        ending += '_foggy_beta_0.01'
-      elif (i % 3) == 2:
-        ending += '_foggy_beta_0.02'
-    return self.image_path_from_index(self._image_index[i]+ending)
+    
+    return self.image_path_from_index(self._image_index[i])
 
   def image_path_from_index(self, index):
     """
@@ -103,9 +98,16 @@ class cityscapes(imdb):
     image_index = []
     for folder in os.listdir(image_set_file):
       imgs = os.listdir(image_set_file + '/' + folder)
-      imgs = [img[:img.find('leftImg8bit')] for img in imgs]
+      imgs = [img[:img.find('leftImg8bit')+11] for img in imgs]
       if 'foggy' in self._image_set:
         imgs = sorted(imgs)
+        for i in range(len(imgs)):
+          if (i % 3) == 0:
+            imgs[i] += '_foggy_beta_0.005'
+          elif (i % 3) == 1:
+            imgs[i] += '_foggy_beta_0.01'
+          elif (i % 3) == 2:
+            imgs[i] += '_foggy_beta_0.02'
       image_index.extend(imgs)
     # with open(image_set_file) as f:
     #   image_index = [x.strip() for x in f.readlines()]
@@ -166,6 +168,7 @@ class cityscapes(imdb):
     Load image and bounding boxes info from cityscapes
     """
     loc = index[:index.find('_')]
+    index = index[:index.find('leftImg8bit')]
     filename = os.path.join(self._data_path, 'gtFine', self._image_set, loc, index + 'gtFine_polygons.json')
     with open(filename, 'r') as f:
         info = json.load(f)

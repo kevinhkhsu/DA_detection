@@ -127,7 +127,7 @@ def cityscapes_eval(detpath,
     # load annotations
     recs = {}
     for i, imagename in enumerate(imagenames):
-      recs[imagename] = parse_rec(annopath.format(imagename[:imagename.find('_')], imagename))
+      recs[imagename] = parse_rec(annopath.format(imagename[:imagename.find('_')], imagename[:imagename.find('leftImg8bit')]))
       if i % 100 == 0:
         print('Reading annotation for {:d}/{:d}'.format(
           i + 1, len(imagenames)))

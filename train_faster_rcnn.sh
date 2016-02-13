@@ -40,19 +40,19 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   KITTI)
-    TRAIN_IMDB="KITTI_train"
+    TRAIN_IMDB="KITTI_train+KITTI_val"
     TEST_IMDB="KITTI_val"
-    STEPSIZE="[350000]"
-    ITERS=490000
-    ANCHORS="[4,8,16,32]"
+    STEPSIZE="[50000]"
+    ITERS=70000
+    ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
     TRAIN_IMDB="cityscapes_train"
     TEST_IMDB="cityscapes_val"
-    STEPSIZE="[350000]"
-    ITERS=490000
-    ANCHORS="[4,8,16,32]"
+    STEPSIZE="[80000]"
+    ITERS=10000
+    ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
   foggyCity)

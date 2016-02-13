@@ -31,15 +31,17 @@ class vgg16(Network):
     self.vgg.classifier = nn.Sequential(*list(self.vgg.classifier._modules.values())[:-1])
 
     # Fix the layers before conv3:
-    for layer in range(10):
-      for p in self.vgg.features[layer].parameters(): p.requires_grad = False
+    #for layer in range(10):
+    #  for p in self.vgg.features[layer].parameters(): p.requires_grad = False
+
+    # self.vgg.features._modules['28'] = nn.Conv2d(512, 1024, [3, 3], padding=1) #for feature_separate
 
     # not using the last maxpool layer
     self._layers['head'] = nn.Sequential(*list(self.vgg.features._modules.values())[:-1])
 
     ##
-    #self.vgg2 = models.vgg16()
-    #self._layers['head_2'] = nn.Sequential(*list(self.vgg2.features._modules.values())[:-1])
+    # self.vgg2 = models.vgg16()
+    # self._layers['head_2'] = nn.Sequential(*list(self.vgg2.features._modules.values())[:-1])
 
   def _image_to_head(self):
     net_conv = self._layers['head'](self._image)
@@ -47,10 +49,10 @@ class vgg16(Network):
     
     return net_conv
 
-  #def _image_to_head_branch(self):
-  #  net_conv2 = self._layers['head_2'](self._image)
-
-  #  return net_conv2
+  # def _image_to_head_branch(self):
+  #   net_conv2 = self._layers['head_2'](self._image)
+  
+  #   return net_conv2
 
   def _head_to_tail(self, pool5):
     pool5_flat = pool5.view(pool5.size(0), -1)
@@ -61,6 +63,12 @@ class vgg16(Network):
   def load_pretrained_cnn(self, state_dict):
     netDict = self.state_dict()
     stateDict = {k: v for k, v in state_dict.items() if k in netDict}
+    # stateDict = {k: v for k, v in state_dict.items() if (k in netDict) and ('vgg.features.28' not in k)} #for feature_separate
+    # print(stateDict.keys())
+    # print(state_dict.keys())
     netDict.update(stateDict)
     nn.Module.load_state_dict(self, netDict)
-    #self.vgg.load_state_dict({k:v for k,v in state_dict.items() if k in self.vgg.state_dict()})
+
+    # self.vgg.load_state_dict({k:v for k,v in state_dict.items() if k in self.vgg.state_dict()}) 
+    self.vgg.load_state_dict({k.replace('vgg.', ''):v for k,v in state_dict.items() if k.replace('vgg.', '') in self.vgg.state_dict()})
+
