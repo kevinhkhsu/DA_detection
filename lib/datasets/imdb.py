@@ -103,13 +103,15 @@ class imdb(object):
     raise NotImplementedError
 
   def _get_widths(self):
+    if 'bdd' in self._name:
+      return [1280 for i in range(self.num_images)]
     return [PIL.Image.open(self.image_path_at(i)).size[0]
             for i in range(self.num_images)]
 
   def append_flipped_images(self):
     num_images = self.num_images
     widths = self._get_widths()
-    
+    print('flipping gts:', num_images)
     for i in range(num_images):
       boxes = self.roidb[i]['boxes'].copy()
       oldx1 = boxes[:, 0].copy()

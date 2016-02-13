@@ -11,7 +11,6 @@ from __future__ import print_function
 import os
 from datasets.imdb import imdb
 import datasets.ds_utils as ds_utils
-import xml.etree.ElementTree as ET
 import numpy as np
 import scipy.sparse
 import scipy.io as sio
@@ -26,23 +25,35 @@ import pylab as pl
 
 import json
 
-class KITTI(imdb):
+class bdd100k(imdb):
   def __init__(self, image_set, use_diff=False):
-    name = 'KITTI' + '_' + image_set
+    name = 'bdd100k' + '_' + image_set
     if use_diff:
       name += '_diff'
     imdb.__init__(self, name)
 
     self._image_set = image_set
+    if 'train' in self._image_set:
+      self.mode = 'train'
+    elif 'val' in self._image_set:
+      self.mode = 'val'
+    
     self._devkit_path = self._get_default_path()
-    self._data_path = os.path.join(self._devkit_path, 'training')
-    with open(os.path.join(self._data_path, "fake_image_2/netD_synthC_score.json"), "r") as read_file:
-      self.cycle_gan_score = json.load(read_file)
-
+    self._data_path = os.path.join(self._devkit_path, 'images', '100k')
     self._classes = ('__background__',  # always index 0
-                     'car')
+                     'bike',
+                     'bus',
+                     'car',
+                     'motor',
+                     'person',
+                     'rider',
+                     'traffic light',
+                     'traffic sign',
+                     'train',
+                     'truck')
+    print('Num Classes:', len(self._classes))
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
-    self._image_ext = '.png'
+    self._image_ext = ''
     self._image_index = self._load_image_set_index()
     # Default to roidb handler
     self._roidb_handler = self.gt_roidb
@@ -71,13 +82,14 @@ class KITTI(imdb):
     """
     Construct an image path from the image's "index" identifier.
     """
-    image_path = os.path.join(self._data_path, 'image_2',
+
+    if 'synth' in self._image_set:
+      image_path = os.path.join(self._devkit_path, self._image_set+'_images',
                               index + self._image_ext)
-    if self._image_set == 'fake':
-      image_path = os.path.join(self._data_path, 'fake_image_2',
-                              index + self._image_ext)
-    if self._image_set == 'fakereal':
-      image_path = os.path.join(self._data_path, 'fakereal', index + self._image_ext)
+    else:
+      image_path = os.path.join(self._data_path, 
+                          index + self._image_ext)
+
     assert os.path.exists(image_path), \
       'Path does not exist: {}'.format(image_path)
     return image_path
@@ -89,30 +101,13 @@ class KITTI(imdb):
     # Example path to image set file:
     # self._devkit_path + /VOCdevkit2007/VOC2007/ImageSets/Main/val.txt
 
-    image_set_file = os.path.join(self._data_path, 'ImageSets',
+    image_set_file = os.path.join(self._devkit_path, 'labels', 'ImageSets',
                                   self._image_set + '.txt')
     assert os.path.exists(image_set_file), \
       'Path does not exist: {}'.format(image_set_file)
 
-    ####Threshold score from cycle gan
-    ll = 7481
-
-    if self._image_set == 'fake':
-      w = np.array(self.cycle_gan_score.values())
-      k = np.array(self.cycle_gan_score.keys())
-      thres = 0.7 #>0.6: 7405, >0.65: 7297, >0.7: 6997, >0.8: 5973, >0.9:3947
-      ll = 6997
-      keep = np.nonzero(w>thres)[0]
-      assert(keep.size == ll)
-      k = k[keep]
-
-      with open(image_set_file) as f:
-        image_index = [x.strip() for x in f.readlines() if x.strip() in k]
-      print(len(image_index))
-
-    else:
-      with open(image_set_file) as f:
-        image_index = [x.strip() for x in f.readlines()]
+    with open(image_set_file) as f:
+      image_index = [x.strip() for x in f.readlines()]
     
     return image_index
 
@@ -121,7 +116,7 @@ class KITTI(imdb):
     Return the default path where KITTI is expected to be installed.
     """
     #return os.path.join(cfg.DATA_DIR, 'VOCdevkit' + self._year)
-    return os.path.join(cfg.DATA_DIR, 'KITTI')
+    return os.path.join(cfg.DATA_DIR, 'bdd100k')
 
   def gt_roidb(self):
     """
@@ -139,7 +134,13 @@ class KITTI(imdb):
       print('{} gt roidb loaded from {}'.format(self.name, cache_file))
       return roidb
 
-    gt_roidb = [self._load_kitti_annotation(index)
+    gt_ann = {}
+    with open(os.path.join(self._devkit_path, 'labels', 'bdd100k_labels_images_%s.json'%self.mode), 'r') as f:
+      annots = json.load(f)
+      for ann in annots:
+        gt_ann[self.mode+'/'+ann['name']] = ann['labels']
+
+    gt_roidb = [self._load_bdd100k_annotation(gt_ann[index])
                 for index in self.image_index]
     with open(cache_file, 'wb') as fid:
       pickle.dump(gt_roidb, fid, pickle.HIGHEST_PROTOCOL)
@@ -166,51 +167,44 @@ class KITTI(imdb):
       box_list = pickle.load(f)
     return self.create_roidb_from_box_list(box_list, gt_roidb)
 
-  def _load_kitti_annotation(self, index):
+  def _load_bdd100k_annotation(self, labels):
     """
-    Load image and bounding boxes info from KITTI
+    Load image and bounding boxes info from bdd100k
     """
-    filename = os.path.join(self._data_path, 'label_2', index + '.txt')
-    with open(filename, 'r') as f:
-        objs = f.readlines()
-    num_objs = len(objs)
+    num_objs = len(labels)
     gt_classes = np.zeros(num_objs, dtype=np.int32)
-    #gt_trunc = np.zeros(num_objs, dtype=np.float32)
     gt_bboxes = np.zeros((num_objs,4), dtype=np.float32)
     overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
     # "Seg" area for KITTI is just the box area
     seg_areas = np.zeros((num_objs), dtype=np.float32)
-    #print num_objs
     ix = 0
-    for obj in objs:
-        obj = obj.split(' ')
-        clsName = obj[0].lower().strip()
-        #print clsName
-        trunc = float(obj[1])
-        occlude = int(obj[2])
-        alpha = float(obj[3])
-        if clsName not in self._classes:
-            gt_classes = gt_classes[:-1]
-            gt_bboxes = gt_bboxes[:-1]
-            overlaps = overlaps[:-1]
-            seg_areas = seg_areas[:-1]
-            continue
-        x1 = float(obj[4])
-        y1 = float(obj[5])
-        x2 = float(obj[6])
-        y2 = float(obj[7])
-        assert x1 >= 0 and x2 >=0 and y1 >= 0 and y2 >= 0
-        assert x1 <= x2 and y1 <= y2
-        cls = self._class_to_ind[clsName]
-        gt_classes[ix] = cls
-        gt_bboxes[ix,:] = [x1, y1, x2, y2]
-        overlaps[ix, cls] = 1.0
-        seg_areas[ix] = (x2 - x1 + 1) * (y2 - y1 + 1)
 
-        ix+=1
+    for ll in labels:
+      clsName = ll['category']
+
+      if clsName in ['drivable area', 'lane']:
+        continue
+      elif clsName not in self._classes:
+        gt_classes = gt_classes[:-1]
+        gt_bboxes = gt_bboxes[:-1]
+        overlaps = overlaps[:-1]
+        seg_areas = seg_areas[:-1]
+        continue
+      x1 = ll['box2d']['x1']
+      x2 = ll['box2d']['x2']
+      y1 = ll['box2d']['y1']
+      y2 = ll['box2d']['y2']
+      assert x1 >= 0 and x2 >=0 and y1 >= 0 and y2 >= 0
+      assert x1 <= x2 and y1 <= y2
+      clss = self._class_to_ind[clsName]
+      gt_classes[ix] = clss
+      gt_bboxes[ix,:] = [x1, y1, x2, y2]
+      overlaps[ix, clss] = 1.0
+      seg_areas[ix] = (x2 - x1 + 1) * (y2 - y1 + 1)
+
+      ix+=1
 
     overlaps = scipy.sparse.csr_matrix(overlaps)
-
 
     return {'boxes': gt_bboxes,
             'gt_classes': gt_classes,
@@ -237,7 +231,7 @@ class KITTI(imdb):
     for cls_ind, cls in enumerate(self.classes):
       if cls == '__background__':
         continue
-      print('Writing {} KITTI results file'.format(cls))
+      print('Writing {} bdd100k results file'.format(cls))
       filename = self._get_voc_results_file_template().format(cls)
       with open(filename, 'wt') as f:
         for im_ind, index in enumerate(self.image_index):
@@ -254,12 +248,11 @@ class KITTI(imdb):
   def _do_python_eval(self, output_dir='output'):
     annopath = os.path.join(
       self._devkit_path,
-      'training',
-      'label_2',
-      '{:s}.txt')
+      'labels',
+      'bdd100k_labels_images_%s.json'%self.mode)
     imagesetfile = os.path.join(
       self._devkit_path,
-      'training',
+      'labels',
       'ImageSets',
       self._image_set + '.txt')
     cachedir = os.path.join(self._devkit_path, 'annotations_cache')

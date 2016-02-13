@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 import os
 import pickle
 import numpy as np
+import json
 
 def parse_rec_voc(filename):
   """ Parse a PASCAL VOC xml file """
@@ -69,6 +70,24 @@ def parse_rec_KITTI(filename):
     obj_struct['name'] = clsName
     obj_struct['difficult'] = 0 #Use all data in KITTI
     obj_struct['diffLev'] = diffLev
+    obj_struct['bbox'] = [x1, y1, x2, y2]
+    objects.append(obj_struct)
+  return objects
+
+def pare_rec_bdd(labels):
+  """ Parse bdd100k"""
+  objects = []
+  for ll in labels:
+    clsName = ll['category']
+    if clsName in ['drivable area', 'lane']:
+      continue
+    x1 = ll['box2d']['x1']
+    x2 = ll['box2d']['x2']
+    y1 = ll['box2d']['y1']
+    y2 = ll['box2d']['y2']
+
+    obj_struct['name'] = clsName
+    obj_struct['difficult'] = 0
     obj_struct['bbox'] = [x1, y1, x2, y2]
     objects.append(obj_struct)
   return objects
@@ -158,8 +177,30 @@ def voc_eval(detpath,
     lines = f.readlines()
   imagenames = [x.strip() for x in lines]
 
-  if not os.path.isfile(cachefile):
-    # load annotations
+  if 'train' in imagesetfile:
+    mode = 'train'
+  if 'val' in imagesetfile:
+    mode = 'val'
+
+  if not os.path.isfile(cachefile) and 'bdd' in annopath:
+    #load bdd annotations
+    recs = {}
+    with open(annopath, 'r') as f:
+      annots = json.load(f)
+    for i, ann in enumerage(annots):
+      imagename = ann['name']
+      if (mode+'/'+imagename) in imagenames:
+        recs[imagename] = parse_rec_bdd(ann['labels'])
+        if i % 100 == 0:
+          print('Reading annotation for {:d}/{:d}'.format(
+            i + 1, len(imagenames)))
+    # save
+    print('Saving cached annotations to {:s}'.format(cachefile))
+    with open(cachefile, 'wb') as f:
+      pickle.dump(recs, f)
+
+  elif not os.path.isfile(cachefile):
+    # load voc/KITTI annotations
     recs = {}
     for i, imagename in enumerate(imagenames):
       recs[imagename] = parse_rec(annopath.format(imagename))

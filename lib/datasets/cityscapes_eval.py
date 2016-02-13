@@ -118,7 +118,10 @@ def cityscapes_eval(detpath,
   # first load gt
   if not os.path.isdir(cachedir):
     os.mkdir(cachedir)
-  cachefile = os.path.join(cachedir, '%s_annots.pkl' % 'cityscapes')
+  if 'foggy' in imagesetfile[0]:
+    cachefile = os.path.join(cachedir, '%s_annots.pkl' % 'cityscapes_foggy')
+  else:
+    cachefile = os.path.join(cachedir, '%s_annots.pkl' % 'cityscapes')
   # read list of images
 
   imagenames = imagesetfile

@@ -10,7 +10,8 @@ TRAIN:
   DISPLAY: 20
   BATCH_SIZE: 256
   DOUBLE_BIAS: False
-  SNAPSHOT_PREFIX: FPNres50_faster_rcnn_img_C2synthK
+  SNAPSHOT_PREFIX: FPNres50_faster_rcnn_imnet_new
+  SNAPSHOT_ITERS: 1000
 TEST:
   HAS_RPN: True
 POOLING_MODE: crop

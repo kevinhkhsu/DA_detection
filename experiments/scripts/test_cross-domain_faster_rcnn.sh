@@ -8,27 +8,28 @@ export PYTHONUNBUFFERED="True"
 GPU_ID=$1
 DATASET=$2
 NET=$3
+TEST_ITER=$4
 
 array=( $@ )
 len=${#array[@]}
-EXTRA_ARGS=${array[@]:3:$len}
+EXTRA_ARGS=${array[@]:4:$len}
 EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 
 case ${DATASET} in
   KITTI)
-    TRAIN_IMDB="KITTI_train"
+    TRAIN_IMDB="KITTI_train+KITTI_val"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[350000]"
-    ITERS=400000
+    ITERS=${TEST_ITER}
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
     TRAIN_IMDB="cityscapes_train"
-    TEST_IMDB="KITTI_val"
+    TEST_IMDB="cityscapes_foggyval"
     STEPSIZE="[350000]"
-    ITERS=10000
-    ANCHORS="[4,8,16,32,64]"
+    ITERS=${TEST_ITER}
+    ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   *)

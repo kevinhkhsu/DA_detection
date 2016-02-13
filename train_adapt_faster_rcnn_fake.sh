@@ -25,9 +25,9 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
-    TRAIN_IMDB_S="cityscapes_faketrain"
-    TRAIN_IMDB_T="KITTI_train"
-    TEST_IMDB="KITTI_val"
+    TRAIN_IMDB_S="cityscapes_synthFoggytrain"
+    TRAIN_IMDB_T="cityscapes_foggytrain"
+    TEST_IMDB="cityscapes_foggyval"
     STEPSIZE="[50000]"
     ITERS=70000
     ANCHORS="[4,8,16,32]"
@@ -54,7 +54,7 @@ set -x
 if [ ! -f ${NET_FINAL}.index ]; then
   if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-      --weight output/vgg16/KITTI_train+KITTI_val/_adapt/vgg16_faster_rcnn_img+inst_K2snythC_2_iter_70000.pth \
+      --weight output/${NET}/cityscapes_train/_adapt/${NET}_faster_rcnn_img_K2snythC_iter_6000.pth \
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \
@@ -66,7 +66,7 @@ if [ ! -f ${NET_FINAL}.index ]; then
       TRAIN.STEPSIZE ${STEPSIZE} ${EXTRA_ARGS}
   else
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-      --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_K2synthC_imnet_iter_6000.pth \
+      --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_K2synthC_filteredSynth0.7_iter_70000.pth \
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \

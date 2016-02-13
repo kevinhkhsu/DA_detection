@@ -15,6 +15,7 @@ from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.KITTI import KITTI
 from datasets.cityscapes import cityscapes
+from datasets.bdd100k import bdd100k
 
 import numpy as np
 
@@ -47,9 +48,15 @@ for split in ['train', 'val', 'fake', 'fakereal']:
   __sets[name] = (lambda split=split, year=year: KITTI(split))
 
 # Set up cityscapes
-for split in ['train', 'val', 'faketrain', 'fakeval', 'foggytrain', 'foggyval']:
+for split in ['train', 'val', 'faketrain', 'fakeval', 'foggytrain', 'foggyval', 'synthFoggytrain']:
   name = 'cityscapes_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: cityscapes(split))
+
+# Set up bdd100k
+for split in ['train', 'val', 'daytrain', 'dayval', 'nighttrain', 'nightval', 'citydaytrain', 'citydayval', 'cleardaytrain', 'cleardayval', 'rainydaytrain', 'rainydayval', \
+              'citydaySynthCityscapes', 'daySynthNight', 'cleardaySynthRainyday']:
+  name = 'bdd100k_{}'.format(split)
+  __sets[name] = (lambda split=split, year=year: bdd100k(split))
 
 def get_imdb(name):
   """Get an imdb (image database) by name."""

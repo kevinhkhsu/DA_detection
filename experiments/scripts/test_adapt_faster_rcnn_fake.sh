@@ -26,9 +26,9 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
-    TRAIN_IMDB_S="cityscapes_faketrain"
-    TRAIN_IMDB_T="KITTI_train"
-    TEST_IMDB="KITTI_val"
+    TRAIN_IMDB_S="cityscapes_synthFoggytrain"
+    TRAIN_IMDB_T="cityscapes_foggytrain"
+    TEST_IMDB="cityscapes_foggyval"
     STEPSIZE="[50000]"
     ITERS=${TEST_ITER}
     ANCHORS="[4,8,16,32]"
@@ -40,7 +40,7 @@ case ${DATASET} in
     ;;
 esac
 
-LOG="experiments/logs/test_${NET}_${TRAIN_IMDB_S}_adapt_$(TEST_IMDB)_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
+LOG="experiments/logs/test_${NET}_${TRAIN_IMDB_S}_adapt_${TEST_IMDB}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 
@@ -48,7 +48,11 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
+<<<<<<< HEAD
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_synthC2C_from_K2synthC_imnet_iter_${ITERS}.pth
+=======
+  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_synthC2C_from_K2synthC_filteredSynth0.65_iter_${ITERS}.pth
+>>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
 fi
 
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then

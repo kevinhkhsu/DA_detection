@@ -232,31 +232,41 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   if vis and 'cityscapes' in imdb.name:
     gt_roidb = [imdb._load_cityscapes_annotation(index)
                   for index in imdb.image_index]
-    annot_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl'
+    if 'foggy' in imdb.name:
+      annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl'
+    else:
+      annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl'
   elif vis and 'KITTI' in imdb.name:
     gt_roidb = [imdb._load_kitti_annotation(index)
               for index in imdb.image_index]
-    annot_path = '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
+    annots_path = '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
   else:
     gt_roidb = None
-
+    annots_path = None
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
-  if not os.path.isdir('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/'):
-    os.makedirs('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/')
-
-  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
+  #if not os.path.isdir('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/'):
+  #  os.makedirs('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/')
+  print(imdb.name)
+  #annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
+  print(annots_path, imdb.name)
   #with open(annots_path, 'rb') as f:
   #  try:
   #    recs = pickle.load(f)
   #  except:
   #    recs = pickle.load(f, encoding='bytes')
+  #print(recs.keys())
+
+  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
+  
   # extract gt objects for this class
   class_recs = {}
   npos = 0
   #for imagename in imdb._image_index:
+
   #  R = [obj for obj in recs[imagename[:imagename.find('leftImg8bit')]] if obj['name'] == 'car']
+
   #  bbox = np.array([x['bbox'] for x in R])
   #  difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
   #  det = [False] * len(R)
@@ -325,7 +335,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
             _t['misc'].average_time()))
 
     if vis and gt_roidb:
-      ov_th, und_th, gt_left = split_bbox(original_all_boxes[1][i], imdb.image_index[i], class_recs)
+      ###ov_th, und_th, gt_left = split_bbox(original_all_boxes[1][i], imdb.image_index[i], class_recs)
       #print(len(ov_th), len(und_th), len(gt_left))
       #gt>=0.5
       if len(ov_th) > 0:
@@ -370,7 +380,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
       #cv2.imshow('test', im2show)
       #cv2.waitKey(0)
       
-
+    #if i > 200: break
 
   det_file = os.path.join(output_dir, 'detections.pkl')
   with open(det_file, 'wb') as f:
