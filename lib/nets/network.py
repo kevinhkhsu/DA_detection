@@ -629,12 +629,9 @@ class Network(nn.Module):
     #discriminator for instance and image level
     self.D_inst = FCDiscriminator_inst(4096)
     self.D_img = FCDiscriminator_img(self._net_conv_channels)
-<<<<<<< HEAD
-    self.D_img2 = FCDiscriminator_img(self._net_conv_channels)
 
     # self.G = Generator(input_nc=self._net_conv_channels)
 
-=======
     if cfg.FPN:
       self.D_img1 = FCDiscriminator_img(self._net_conv_channels)
       self.D_img2 = FCDiscriminator_img(self._net_conv_channels)
@@ -642,7 +639,7 @@ class Network(nn.Module):
       self.D_img4 = FCDiscriminator_img(self._net_conv_channels)
 
     self.D_img2 = FCDiscriminator_img(self._net_conv_channels)
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
+
     # self.D_img_domain = FCDiscriminator_img(self._net_conv_channels)
 
     # self.decoder = decoder(self._net_conv_channels)
