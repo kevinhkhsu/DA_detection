@@ -744,11 +744,7 @@ class Network(nn.Module):
       self._score_summaries[k] = self._predictions[k]
 
     return rois, cls_prob, bbox_pred, net_conv, fc7
-<<<<<<< HEAD
     # return rois, cls_prob, bbox_pred, net_conv_orig, fc7 #feature_separate
-
-=======
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
     
   def _clip_boxes(self, boxes, im_shape):
     """Clip boxes to image boundaries."""
@@ -870,8 +866,6 @@ class Network(nn.Module):
     normal_init(self.D_img.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
     normal_init(self.D_img.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
 
-<<<<<<< HEAD
-=======
     if cfg.FPN:
       normal_init(self.D_img1.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
       normal_init(self.D_img1.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
@@ -893,16 +887,13 @@ class Network(nn.Module):
       normal_init(self.D_img4.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
       normal_init(self.D_img4.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
 
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
-    normal_init(self.D_img2.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
-    normal_init(self.D_img2.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
-    normal_init(self.D_img2.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
-    normal_init(self.D_img2.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
-<<<<<<< HEAD
+    #normal_init(self.D_img2.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    #normal_init(self.D_img2.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    #normal_init(self.D_img2.conv3, 0, 0.01, cfg.TRAIN.TRUNCATED)
+    #normal_init(self.D_img2.classifier, 0, 0.01, cfg.TRAIN.TRUNCATED)
+
 
     # self.G.apply(G_weights_init_normal)
-=======
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
 
     # normal_init(self.D_img_domain.conv1, 0, 0.01, cfg.TRAIN.TRUNCATED)
     # normal_init(self.D_img_domain.conv2, 0, 0.01, cfg.TRAIN.TRUNCATED)
@@ -923,8 +914,6 @@ class Network(nn.Module):
                                                      self._predictions['cls_prob'].data.cpu().numpy(), \
                                                      self._predictions['bbox_pred'].data.cpu().numpy(), \
                                                      self._predictions['rois'].data.cpu().numpy()
-<<<<<<< HEAD
-
     # im = self.G(net_conv)
     # im = ((im[0].cpu().data.numpy() + 1.) / 2.) * 255
     # cv2.imwrite('./test.png', im.astype(np.uint8).transpose([1,2,0])) 
@@ -932,12 +921,6 @@ class Network(nn.Module):
     #im = self.G(net_conv[:,:512,:,:]+net_conv[:,512:,:,:])
     #im = ((im[0].cpu().data.numpy() + 1.) / 2.) * 255
     #cv2.imwrite('./test.png', im.astype(np.uint8).transpose([1,2,0])) 
-
-=======
-    # im = self.decoder(net_conv)
-    # im = (im[0].cpu().data.numpy() * 255).astype(np.uint8).transpose([1,2,0])
-    # cv2.imwrite('./test.png', im)
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
     self.delete_intermediate_states()
     return cls_score, cls_prob, bbox_pred, rois, fc7, net_conv
 
@@ -1966,8 +1949,6 @@ class Network(nn.Module):
     # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
     # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
 
-<<<<<<< HEAD
-=======
   def train_adapt_step_img_weighted(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op, synth_weight):
     source_label = 0
     target_label = 1
@@ -2090,7 +2071,6 @@ class Network(nn.Module):
     # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
     # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
 
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
     #train with source
     fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
 
@@ -2138,9 +2118,6 @@ class Network(nn.Module):
     loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
 
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
-<<<<<<< HEAD
-    
-=======
 
   def FPN_train_adapt_step_img_x5(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op, D_img_op1, D_img_op2, D_img_op3, D_img_op4):
     source_label = 0
@@ -2261,7 +2238,6 @@ class Network(nn.Module):
 
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
 
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
   def train_adapt_adversarial_step(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
     source_label = 0
     target_label = 1
