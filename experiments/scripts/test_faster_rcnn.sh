@@ -60,6 +60,14 @@ case ${DATASET} in
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
+  bdd100k)
+    TRAIN_IMDB="bdd100k_daytrain"
+    TEST_IMDB="bdd100k_dayval"
+    STEPSIZE="[350000]"
+    ITERS=180000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
   *)
     echo "No dataset given"
     exit
@@ -74,7 +82,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_day_iter_${ITERS}.pth
 fi
 set -x
 

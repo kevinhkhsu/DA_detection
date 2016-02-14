@@ -229,28 +229,29 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
 
   output_dir = get_output_dir(imdb, weights_filename)
 
-  if vis and 'cityscapes' in imdb.name:
-    gt_roidb = [imdb._load_cityscapes_annotation(index)
-                  for index in imdb.image_index]
-    if 'foggy' in imdb.name:
-      annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl'
-    else:
-      annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl'
-  elif vis and 'KITTI' in imdb.name:
-    gt_roidb = [imdb._load_kitti_annotation(index)
-              for index in imdb.image_index]
-    annots_path = '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
-  else:
-    gt_roidb = None
-    annots_path = None
+  # if vis and 'cityscapes' in imdb.name:
+  #   gt_roidb = [imdb._load_cityscapes_annotation(index)
+  #                 for index in imdb.image_index]
+  #   if 'foggy' in imdb.name:
+  #     annots_path = '%s/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl' % cfg.DATA_DIR
+  #   else:
+  #     annots_path = '%s/CityScapes/annotations_cache/cityscapes_annots.pkl' % cfg.DATA_DIR
+  # elif vis and 'KITTI' in imdb.name:
+  #   gt_roidb = [imdb._load_kitti_annotation(index)
+  #             for index in imdb.image_index]
+  #   annots_path = '%s/KITTI/annotations_cache/val_annots.pkl' % cfg.DATA_DIR
+  # else:
+  #   gt_roidb = None
+  #   annots_path = None
+
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
   #if not os.path.isdir('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/'):
   #  os.makedirs('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/')
-  print(imdb.name)
+  # print(imdb.name)
   #annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
-  print(annots_path, imdb.name)
+  # print(annots_path, imdb.name)
   #with open(annots_path, 'rb') as f:
   #  try:
   #    recs = pickle.load(f)

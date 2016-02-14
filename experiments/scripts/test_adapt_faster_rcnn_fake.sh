@@ -48,11 +48,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-<<<<<<< HEAD
-  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_synthC2C_from_K2synthC_imnet_iter_${ITERS}.pth
-=======
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_synthC2C_from_K2synthC_filteredSynth0.65_iter_${ITERS}.pth
->>>>>>> c45152eadefa0f3c6e87cdd1f76dc9b06a32afff
 fi
 
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then

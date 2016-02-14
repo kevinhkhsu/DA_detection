@@ -66,7 +66,7 @@ if [ ! -f ${NET_FINAL}.index ]; then
       TRAIN.STEPSIZE ${STEPSIZE} ${EXTRA_ARGS}
   else
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-      --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_K2synthC_filteredSynth0.7_iter_70000.pth \
+      --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_weighted_K2synthC_iter_70000.pth \
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \

@@ -1971,7 +1971,7 @@ class Network(nn.Module):
 
     # net_conv = interp_S(net_conv)
     #det loss
-    loss_S = self._losses['total_loss']
+    loss_S = self._losses['total_loss'] * synth_weight
     #D_inst
     # D_inst_out = self.D_inst(fc7)
     #D_img

@@ -83,7 +83,7 @@ class bdd100k(imdb):
     Construct an image path from the image's "index" identifier.
     """
 
-    if 'synth' in self._image_set:
+    if 'synth' in self._image_set.lower():
       image_path = os.path.join(self._devkit_path, self._image_set+'_images',
                               index + self._image_ext)
     else:
@@ -270,27 +270,27 @@ class bdd100k(imdb):
       rec, prec, ap, rec_ALL = voc_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
-      pl.plot(rec, prec, lw=2, 
-              label='Precision-recall curve of class {} (ap = {:.4f})'
-              ''.format(cls, ap))
+      # pl.plot(rec, prec, lw=2, 
+      #         label='Precision-recall curve of class {} (ap = {:.4f})'
+      #         ''.format(cls, ap))
       aps += [ap]
-      rc += [rec]
+      # rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
 
-    pl.xlabel('Recall')
-    pl.ylabel('Precision')
-    plt.grid(True)
-    pl.ylim([0.0, 1.05])
-    pl.xlim([0.0, 1.0])
-    pl.title('Precision-Recall')
-    pl.legend(loc="upper right")     
+    # pl.xlabel('Recall')
+    # pl.ylabel('Precision')
+    # plt.grid(True)
+    # pl.ylim([0.0, 1.05])
+    # pl.xlim([0.0, 1.0])
+    # pl.title('Precision-Recall')
+    # pl.legend(loc="upper right")     
     # plt.show()
-    plt.savefig('./pr.png')
+    # plt.savefig('./pr.png')
 
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
-    print(('Mean recall = {:.4f}'.format(np.mean(rc))))
+    # print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:
