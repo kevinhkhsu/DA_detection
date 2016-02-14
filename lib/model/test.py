@@ -233,13 +233,13 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
     gt_roidb = [imdb._load_cityscapes_annotation(index)
                   for index in imdb.image_index]
     if 'foggy' in imdb.name:
-      annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl'
+      annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl'
     else:
-      annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl'
+      annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl'
   elif vis and 'KITTI' in imdb.name:
     gt_roidb = [imdb._load_kitti_annotation(index)
               for index in imdb.image_index]
-    annots_path = '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
+    annots_path = '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
   else:
     gt_roidb = None
     annots_path = None
