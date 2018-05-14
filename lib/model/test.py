@@ -92,7 +92,7 @@ def im_detect(net, im):
   im_blob = blobs['data']
   blobs['im_info'] = np.array([im_blob.shape[1], im_blob.shape[2], im_scales[0]], dtype=np.float32)
 
-  _, scores, bbox_pred, rois = net.test_image(blobs['data'], blobs['im_info'])
+  _, scores, bbox_pred, rois, fc7, net_conv = net.test_image(blobs['data'], blobs['im_info'])
   
   boxes = rois[:, 1:5] / im_scales[0]
   scores = np.reshape(scores, [scores.shape[0], -1])
@@ -106,7 +106,7 @@ def im_detect(net, im):
     # Simply repeat the boxes, once for each class
     pred_boxes = np.tile(boxes, (1, scores.shape[1]))
 
-  return scores, pred_boxes
+  return scores, pred_boxes#, fc7, net_conv
 
 def apply_nms(all_boxes, thresh):
   """Apply non-maximum suppression to all predicted boxes output by the
@@ -136,8 +136,35 @@ def apply_nms(all_boxes, thresh):
         continue
       nms_boxes[cls_ind][im_ind] = dets[keep, :].copy()
   return nms_boxes
+def draw_car_bb(im, bboxes, scores=[], thr=0.3, type='det'):
+    bboxes = bboxes.astype(int)
+    imgcv = np.copy(im)
+    h, w, _ = imgcv.shape
+    color = (255,0,0)
+    if type == 'gt':
+      scores = np.ones(len(bboxes))
+      color = (0,0,255)
+
+    for i, box in enumerate(bboxes):
+      if scores[i] < thr:
+          continue
+
+      thick = int((h + w) / 1000) #original: int((h + w) / 300)
+      cv2.rectangle(imgcv,
+                    (box[0], box[1]), (box[2], box[3]),
+                    color, thick)
+      mess = '%s: %.3f' % ('Car', scores[i])
+      if type == 'gt':
+        mess = ''
+      cv2.putText(imgcv, mess, (box[0], box[1] - 12),
+                  0, 1e-3 * h / 2., color, 2)
+
+    return imgcv
+
 
 def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
+  vis = False
+
   np.random.seed(cfg.RNG_SEED)
   """Test a Fast R-CNN network on an image database."""
   num_images = len(imdb.image_index)
@@ -148,6 +175,16 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
          for _ in range(imdb.num_classes)]
 
   output_dir = get_output_dir(imdb, weights_filename)
+
+  if vis and 'cityscapes' in imdb.name:
+    gt_roidb = [imdb._load_cityscapes_annotation(index)
+                  for index in imdb.image_index]
+  elif vis and 'KITTI' in imdb.name:
+    gt_roidb = [imdb._load_kitti_annotation(index)
+              for index in imdb.image_index]
+  else:
+    gt_roidb = None
+
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
@@ -181,10 +218,22 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
           keep = np.where(all_boxes[j][i][:, -1] >= image_thresh)[0]
           all_boxes[j][i] = all_boxes[j][i][keep, :]
     _t['misc'].toc()
-
+    
     print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
         .format(i + 1, num_images, _t['im_detect'].average_time(),
             _t['misc'].average_time()))
+
+    if vis and gt_roidb:
+      #draw ground truth boxes
+      im2show = draw_car_bb(im, gt_roidb[i]['boxes'], type='gt')
+
+      #draw detected boxes
+      im2show = draw_car_bb(im2show, np.squeeze(all_boxes[1][i][:, :-1]), np.squeeze(all_boxes[1][i][:,-1])) #draw class 1: car
+      cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/img_20000/'+imdb.image_index[i]+'.png', im2show)
+      #cv2.imshow('test', im2show)
+      #cv2.waitKey(0)
+      
+
 
   det_file = os.path.join(output_dir, 'detections.pkl')
   with open(det_file, 'wb') as f:

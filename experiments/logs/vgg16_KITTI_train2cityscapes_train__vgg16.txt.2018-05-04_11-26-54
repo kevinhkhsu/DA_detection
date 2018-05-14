@@ -1,0 +1,347 @@
++ echo Logging output to experiments/logs/vgg16_KITTI_train2cityscapes_train__vgg16.txt.2018-05-04_11-26-54
+Logging output to experiments/logs/vgg16_KITTI_train2cityscapes_train__vgg16.txt.2018-05-04_11-26-54
++ set +x
++ '[' '!' -f output/vgg16/KITTI_train/adapt/vgg16_faster_rcnn_iter_70000.pth.index ']'
++ [[ ! -z '' ]]
++ CUDA_VISIBLE_DEVICES=0
++ time python ./tools/trainval_net_adapt.py --weight output/vgg16/KITTI_train/default/vgg16_faster_rcnn_iter_490000.pth --imdb KITTI_train --imdbval cityscapes_val --imdb_T cityscapes_train --iters 70000 --cfg experiments/cfgs/vgg16.yml --tag _adapt --net vgg16 --set ANCHOR_SCALES '[4,8,16,32]' ANCHOR_RATIOS '[0.5,1,2]' TRAIN.STEPSIZE '[50000]'
+Called with args:
+Namespace(cfg_file='experiments/cfgs/vgg16.yml', imdb_T_name='cityscapes_train', imdb_name='KITTI_train', imdbval_name='cityscapes_val', max_iters=70000, net='vgg16', set_cfgs=['ANCHOR_SCALES', '[4,8,16,32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'TRAIN.STEPSIZE', '[50000]'], tag='_adapt', weight='output/vgg16/KITTI_train/default/vgg16_faster_rcnn_iter_490000.pth')
+Using config:
+{'ADAPT_LAMBDA': 0.1,
+ 'ANCHOR_RATIOS': [0.5, 1, 2],
+ 'ANCHOR_SCALES': [4, 8, 16, 32],
+ 'DATA_DIR': '/home/kevin/Downloads',
+ 'EXP_DIR': 'vgg16',
+ 'MATLAB': 'matlab',
+ 'MOBILENET': {'DEPTH_MULTIPLIER': 1.0,
+               'FIXED_LAYERS': 5,
+               'REGU_DEPTH': False,
+               'WEIGHT_DECAY': 4e-05},
+ 'PIXEL_MEANS': array([[[ 102.9801,  115.9465,  122.7717]]]),
+ 'POOLING_MODE': 'crop',
+ 'POOLING_SIZE': 7,
+ 'RESNET': {'FIXED_BLOCKS': 1, 'MAX_POOL': False},
+ 'RNG_SEED': 3,
+ 'ROOT_DIR': '/home/disk1/DA/pytorch-faster-rcnn',
+ 'RPN_CHANNELS': 512,
+ 'TEST': {'BBOX_REG': True,
+          'HAS_RPN': True,
+          'MAX_SIZE': 1000,
+          'MODE': 'nms',
+          'NMS': 0.3,
+          'PROPOSAL_METHOD': 'gt',
+          'RPN_NMS_THRESH': 0.7,
+          'RPN_POST_NMS_TOP_N': 300,
+          'RPN_PRE_NMS_TOP_N': 6000,
+          'RPN_TOP_N': 5000,
+          'SCALES': [500],
+          'SVM': False},
+ 'TRAIN': {'ASPECT_GROUPING': False,
+           'BATCH_SIZE': 256,
+           'BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'BBOX_NORMALIZE_MEANS': [0.0, 0.0, 0.0, 0.0],
+           'BBOX_NORMALIZE_STDS': [0.1, 0.1, 0.2, 0.2],
+           'BBOX_NORMALIZE_TARGETS': True,
+           'BBOX_NORMALIZE_TARGETS_PRECOMPUTED': True,
+           'BBOX_REG': True,
+           'BBOX_THRESH': 0.5,
+           'BG_THRESH_HI': 0.5,
+           'BG_THRESH_LO': 0.0,
+           'BIAS_DECAY': False,
+           'DISPLAY': 20,
+           'DOUBLE_BIAS': True,
+           'FG_FRACTION': 0.25,
+           'FG_THRESH': 0.5,
+           'GAMMA': 0.1,
+           'HAS_RPN': True,
+           'IMS_PER_BATCH': 1,
+           'LEARNING_RATE': 0.001,
+           'MAX_SIZE': 1000,
+           'MOMENTUM': 0.9,
+           'PROPOSAL_METHOD': 'gt',
+           'RPN_BATCHSIZE': 256,
+           'RPN_BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'RPN_CLOBBER_POSITIVES': False,
+           'RPN_FG_FRACTION': 0.5,
+           'RPN_NEGATIVE_OVERLAP': 0.3,
+           'RPN_NMS_THRESH': 0.7,
+           'RPN_POSITIVE_OVERLAP': 0.7,
+           'RPN_POSITIVE_WEIGHT': -1.0,
+           'RPN_POST_NMS_TOP_N': 2000,
+           'RPN_PRE_NMS_TOP_N': 12000,
+           'SCALES': [500],
+           'SNAPSHOT_ITERS': 5000,
+           'SNAPSHOT_KEPT': 14,
+           'SNAPSHOT_PREFIX': 'vgg16_faster_rcnn_comb_const_GRL_lambda_e-1_img_strided',
+           'STEPSIZE': [50000],
+           'SUMMARY_INTERVAL': 180,
+           'TRUNCATED': False,
+           'USE_ALL_GT': True,
+           'USE_FLIPPED': True,
+           'USE_GT': False,
+           'WEIGHT_DECAY': 0.0005},
+ 'USE_GPU_NMS': True}
+Loaded dataset `KITTI_train` for training
+Set proposal method: gt
+Appending horizontally-flipped training examples...
+KITTI_train gt roidb loaded from /home/kevin/Downloads/cache/KITTI_train_gt_roidb.pkl
+done
+Preparing training data...
+done
+7424 roidb entries
+Loaded dataset `cityscapes_train` for training
+Set proposal method: gt
+Appending horizontally-flipped training examples...
+cityscapes_train gt roidb loaded from /home/kevin/Downloads/cache/cityscapes_train_gt_roidb.pkl
+done
+Preparing training data...
+done
+Output will be saved to `/home/disk1/DA/pytorch-faster-rcnn/output/vgg16/KITTI_train/_adapt`
+TensorFlow summaries will be saved to `/home/disk1/DA/pytorch-faster-rcnn/tensorboard/vgg16/KITTI_train/_adapt`
+Loaded dataset `cityscapes_val` for training
+Set proposal method: gt
+Preparing training data...
+cityscapes_val gt roidb loaded from /home/kevin/Downloads/cache/cityscapes_val_gt_roidb.pkl
+done
+500 validation roidb entries
+Filtered 904 roidb entries: 7424 -> 6520
+Filtered 22 roidb entries: 500 -> 478
+Filtered 288 roidb entries: 5950 -> 5662
+Solving...
+Loading initial model weights from output/vgg16/KITTI_train/default/vgg16_faster_rcnn_iter_490000.pth
+Loaded.
+iter: 20 / 70000, total loss: 2.773402
+ >>> rpn_loss_cls: 0.000002
+ >>> rpn_loss_box: 0.000042
+ >>> loss_cls: 0.001052
+ >>> loss_box: 0.003142
+ >>> D_img_loss_S: 0.669535
+ >>> D_inst_loss_S: 0.682106
+ >>> D_const_loss_S: 0.009218
+ >>> D_img_loss_T: 0.697718
+ >>> D_inst_loss_T: 0.703313
+ >>> D_const_loss_T: 0.007276
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.081s / iter
+iter: 40 / 70000, total loss: 2.747582
+ >>> rpn_loss_cls: 0.000502
+ >>> rpn_loss_box: 0.000721
+ >>> loss_cls: 0.001649
+ >>> loss_box: 0.003878
+ >>> D_img_loss_S: 0.653895
+ >>> D_inst_loss_S: 0.676482
+ >>> D_const_loss_S: 0.012940
+ >>> D_img_loss_T: 0.681905
+ >>> D_inst_loss_T: 0.704074
+ >>> D_const_loss_T: 0.011536
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.062s / iter
+iter: 60 / 70000, total loss: 2.824180
+ >>> rpn_loss_cls: 0.000405
+ >>> rpn_loss_box: 0.000684
+ >>> loss_cls: 0.064128
+ >>> loss_box: 0.037190
+ >>> D_img_loss_S: 0.647857
+ >>> D_inst_loss_S: 0.679780
+ >>> D_const_loss_S: 0.016825
+ >>> D_img_loss_T: 0.672307
+ >>> D_inst_loss_T: 0.693534
+ >>> D_const_loss_T: 0.011470
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.062s / iter
+iter: 80 / 70000, total loss: 2.719749
+ >>> rpn_loss_cls: 0.000073
+ >>> rpn_loss_box: 0.000218
+ >>> loss_cls: 0.000526
+ >>> loss_box: 0.004655
+ >>> D_img_loss_S: 0.637753
+ >>> D_inst_loss_S: 0.670470
+ >>> D_const_loss_S: 0.018670
+ >>> D_img_loss_T: 0.648145
+ >>> D_inst_loss_T: 0.708689
+ >>> D_const_loss_T: 0.030550
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.060s / iter
+iter: 100 / 70000, total loss: 2.711013
+ >>> rpn_loss_cls: 0.001025
+ >>> rpn_loss_box: 0.001437
+ >>> loss_cls: 0.017779
+ >>> loss_box: 0.005532
+ >>> D_img_loss_S: 0.627451
+ >>> D_inst_loss_S: 0.673059
+ >>> D_const_loss_S: 0.024459
+ >>> D_img_loss_T: 0.650699
+ >>> D_inst_loss_T: 0.689407
+ >>> D_const_loss_T: 0.020167
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.062s / iter
+iter: 120 / 70000, total loss: 2.688142
+ >>> rpn_loss_cls: 0.000014
+ >>> rpn_loss_box: 0.002939
+ >>> loss_cls: 0.000011
+ >>> loss_box: 0.000660
+ >>> D_img_loss_S: 0.613898
+ >>> D_inst_loss_S: 0.671892
+ >>> D_const_loss_S: 0.030613
+ >>> D_img_loss_T: 0.646106
+ >>> D_inst_loss_T: 0.696000
+ >>> D_const_loss_T: 0.026009
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.060s / iter
+iter: 140 / 70000, total loss: 2.669891
+ >>> rpn_loss_cls: 0.000015
+ >>> rpn_loss_box: 0.000225
+ >>> loss_cls: 0.000219
+ >>> loss_box: 0.001139
+ >>> D_img_loss_S: 0.599059
+ >>> D_inst_loss_S: 0.684879
+ >>> D_const_loss_S: 0.045102
+ >>> D_img_loss_T: 0.638021
+ >>> D_inst_loss_T: 0.678300
+ >>> D_const_loss_T: 0.022932
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.058s / iter
+iter: 160 / 70000, total loss: 2.627423
+ >>> rpn_loss_cls: 0.000015
+ >>> rpn_loss_box: 0.000335
+ >>> loss_cls: 0.000756
+ >>> loss_box: 0.001375
+ >>> D_img_loss_S: 0.581273
+ >>> D_inst_loss_S: 0.679326
+ >>> D_const_loss_S: 0.052276
+ >>> D_img_loss_T: 0.625848
+ >>> D_inst_loss_T: 0.664999
+ >>> D_const_loss_T: 0.021220
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.053s / iter
+iter: 180 / 70000, total loss: 2.605921
+ >>> rpn_loss_cls: 0.000028
+ >>> rpn_loss_box: 0.000509
+ >>> loss_cls: 0.001191
+ >>> loss_box: 0.001990
+ >>> D_img_loss_S: 0.553953
+ >>> D_inst_loss_S: 0.673258
+ >>> D_const_loss_S: 0.064703
+ >>> D_img_loss_T: 0.589768
+ >>> D_inst_loss_T: 0.675455
+ >>> D_const_loss_T: 0.045067
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.052s / iter
+iter: 200 / 70000, total loss: 2.620674
+ >>> rpn_loss_cls: 0.000105
+ >>> rpn_loss_box: 0.000409
+ >>> loss_cls: 0.001461
+ >>> loss_box: 0.003328
+ >>> D_img_loss_S: 0.573746
+ >>> D_inst_loss_S: 0.658983
+ >>> D_const_loss_S: 0.046391
+ >>> D_img_loss_T: 0.558460
+ >>> D_inst_loss_T: 0.701838
+ >>> D_const_loss_T: 0.075951
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.050s / iter
+iter: 220 / 70000, total loss: 2.662233
+ >>> rpn_loss_cls: 0.001536
+ >>> rpn_loss_box: 0.001217
+ >>> loss_cls: 0.006382
+ >>> loss_box: 0.019658
+ >>> D_img_loss_S: 0.553884
+ >>> D_inst_loss_S: 0.681641
+ >>> D_const_loss_S: 0.068662
+ >>> D_img_loss_T: 0.543530
+ >>> D_inst_loss_T: 0.701441
+ >>> D_const_loss_T: 0.084281
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.051s / iter
+iter: 240 / 70000, total loss: 2.609065
+ >>> rpn_loss_cls: 0.002268
+ >>> rpn_loss_box: 0.002777
+ >>> loss_cls: 0.015235
+ >>> loss_box: 0.012171
+ >>> D_img_loss_S: 0.516132
+ >>> D_inst_loss_S: 0.682045
+ >>> D_const_loss_S: 0.090684
+ >>> D_img_loss_T: 0.556427
+ >>> D_inst_loss_T: 0.670173
+ >>> D_const_loss_T: 0.061152
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.051s / iter
+iter: 260 / 70000, total loss: 2.573217
+ >>> rpn_loss_cls: 0.000122
+ >>> rpn_loss_box: 0.000946
+ >>> loss_cls: 0.011971
+ >>> loss_box: 0.005335
+ >>> D_img_loss_S: 0.499444
+ >>> D_inst_loss_S: 0.676650
+ >>> D_const_loss_S: 0.097976
+ >>> D_img_loss_T: 0.465061
+ >>> D_inst_loss_T: 0.689994
+ >>> D_const_loss_T: 0.125718
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.048s / iter
+iter: 280 / 70000, total loss: 2.581374
+ >>> rpn_loss_cls: 0.000054
+ >>> rpn_loss_box: 0.001092
+ >>> loss_cls: 0.023669
+ >>> loss_box: 0.009483
+ >>> D_img_loss_S: 0.462429
+ >>> D_inst_loss_S: 0.690338
+ >>> D_const_loss_S: 0.127577
+ >>> D_img_loss_T: 0.432168
+ >>> D_inst_loss_T: 0.688258
+ >>> D_const_loss_T: 0.146306
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.048s / iter
+iter: 300 / 70000, total loss: 2.491631
+ >>> rpn_loss_cls: 0.000007
+ >>> rpn_loss_box: 0.000523
+ >>> loss_cls: 0.001368
+ >>> loss_box: 0.006361
+ >>> D_img_loss_S: 0.384450
+ >>> D_inst_loss_S: 0.682820
+ >>> D_const_loss_S: 0.174916
+ >>> D_img_loss_T: 0.375672
+ >>> D_inst_loss_T: 0.683691
+ >>> D_const_loss_T: 0.181823
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.045s / iter
+iter: 320 / 70000, total loss: 2.474091
+ >>> rpn_loss_cls: 0.000027
+ >>> rpn_loss_box: 0.000163
+ >>> loss_cls: 0.000000
+ >>> loss_box: 0.000132
+ >>> D_img_loss_S: 0.374172
+ >>> D_inst_loss_S: 0.696973
+ >>> D_const_loss_S: 0.189392
+ >>> D_img_loss_T: 0.361117
+ >>> D_inst_loss_T: 0.668239
+ >>> D_const_loss_T: 0.183877
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.044s / iter
+iter: 340 / 70000, total loss: 2.483526
+ >>> rpn_loss_cls: 0.000118
+ >>> rpn_loss_box: 0.000411
+ >>> loss_cls: 0.000576
+ >>> loss_box: 0.001362
+ >>> D_img_loss_S: 0.370343
+ >>> D_inst_loss_S: 0.694762
+ >>> D_const_loss_S: 0.190894
+ >>> D_img_loss_T: 0.331734
+ >>> D_inst_loss_T: 0.681126
+ >>> D_const_loss_T: 0.212200
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.043s / iter
+iter: 360 / 70000, total loss: 2.500991
+ >>> rpn_loss_cls: 0.000055
+ >>> rpn_loss_box: 0.001588
+ >>> loss_cls: 0.001124
+ >>> loss_box: 0.003154
+ >>> D_img_loss_S: 0.321567
+ >>> D_inst_loss_S: 0.708750
+ >>> D_const_loss_S: 0.232698
+ >>> D_img_loss_T: 0.256065
+ >>> D_inst_loss_T: 0.699204
+ >>> D_const_loss_T: 0.276785
+ >>> lambda: 0.100000 >>> lr: 0.001000
+speed: 1.042s / iter

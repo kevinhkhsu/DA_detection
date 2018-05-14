@@ -43,4 +43,3 @@ def pth_nms(dets, thresh):
 
     return order[keep[:num_out[0]].cuda()].contiguous()
     # return order[keep[:num_out[0]]].contiguous()
-

@@ -1,0 +1,604 @@
++ echo Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-04_17-47-27
+Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-04_17-47-27
++ set +x
++ [[ ! -z '' ]]
++ CUDA_VISIBLE_DEVICES=0
++ time python ./tools/test_net.py --imdb cityscapes_val --model output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_comb_const_adv_lambda_e-4_iter_15000.pth --cfg experiments/cfgs/vgg16.yml --tag _adapt --net vgg16 --set ANCHOR_SCALES '[4,8,16,32]' ANCHOR_RATIOS '[0.5,1,2]'
+Called with args:
+Namespace(cfg_file='experiments/cfgs/vgg16.yml', comp_mode=False, imdb_name='cityscapes_val', max_per_image=100, model='output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_comb_const_adv_lambda_e-4_iter_15000.pth', net='vgg16', set_cfgs=['ANCHOR_SCALES', '[4,8,16,32]', 'ANCHOR_RATIOS', '[0.5,1,2]'], tag='_adapt')
+Using config:
+{'ADAPT_LAMBDA': 0.1,
+ 'ANCHOR_RATIOS': [0.5, 1, 2],
+ 'ANCHOR_SCALES': [4, 8, 16, 32],
+ 'DATA_DIR': '/home/kevin/Downloads',
+ 'EXP_DIR': 'vgg16',
+ 'MATLAB': 'matlab',
+ 'MOBILENET': {'DEPTH_MULTIPLIER': 1.0,
+               'FIXED_LAYERS': 5,
+               'REGU_DEPTH': False,
+               'WEIGHT_DECAY': 4e-05},
+ 'PIXEL_MEANS': array([[[ 102.9801,  115.9465,  122.7717]]]),
+ 'POOLING_MODE': 'crop',
+ 'POOLING_SIZE': 7,
+ 'RESNET': {'FIXED_BLOCKS': 1, 'MAX_POOL': False},
+ 'RNG_SEED': 3,
+ 'ROOT_DIR': '/home/disk1/DA/pytorch-faster-rcnn',
+ 'RPN_CHANNELS': 512,
+ 'TEST': {'BBOX_REG': True,
+          'HAS_RPN': True,
+          'MAX_SIZE': 1000,
+          'MODE': 'nms',
+          'NMS': 0.3,
+          'PROPOSAL_METHOD': 'gt',
+          'RPN_NMS_THRESH': 0.7,
+          'RPN_POST_NMS_TOP_N': 300,
+          'RPN_PRE_NMS_TOP_N': 6000,
+          'RPN_TOP_N': 5000,
+          'SCALES': [500],
+          'SVM': False},
+ 'TRAIN': {'ASPECT_GROUPING': False,
+           'BATCH_SIZE': 256,
+           'BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'BBOX_NORMALIZE_MEANS': [0.0, 0.0, 0.0, 0.0],
+           'BBOX_NORMALIZE_STDS': [0.1, 0.1, 0.2, 0.2],
+           'BBOX_NORMALIZE_TARGETS': True,
+           'BBOX_NORMALIZE_TARGETS_PRECOMPUTED': True,
+           'BBOX_REG': True,
+           'BBOX_THRESH': 0.5,
+           'BG_THRESH_HI': 0.5,
+           'BG_THRESH_LO': 0.0,
+           'BIAS_DECAY': False,
+           'DISPLAY': 20,
+           'DOUBLE_BIAS': True,
+           'FG_FRACTION': 0.25,
+           'FG_THRESH': 0.5,
+           'GAMMA': 0.1,
+           'HAS_RPN': True,
+           'IMS_PER_BATCH': 1,
+           'LEARNING_RATE': 0.001,
+           'MAX_SIZE': 1000,
+           'MOMENTUM': 0.9,
+           'PROPOSAL_METHOD': 'gt',
+           'RPN_BATCHSIZE': 256,
+           'RPN_BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'RPN_CLOBBER_POSITIVES': False,
+           'RPN_FG_FRACTION': 0.5,
+           'RPN_NEGATIVE_OVERLAP': 0.3,
+           'RPN_NMS_THRESH': 0.7,
+           'RPN_POSITIVE_OVERLAP': 0.7,
+           'RPN_POSITIVE_WEIGHT': -1.0,
+           'RPN_POST_NMS_TOP_N': 2000,
+           'RPN_PRE_NMS_TOP_N': 12000,
+           'SCALES': [500],
+           'SNAPSHOT_ITERS': 5000,
+           'SNAPSHOT_KEPT': 14,
+           'SNAPSHOT_PREFIX': 'vgg16_faster_rcnn_comb_const_GRL_lambda_e-1_img_strided',
+           'STEPSIZE': [30000],
+           'SUMMARY_INTERVAL': 180,
+           'TRUNCATED': False,
+           'USE_ALL_GT': True,
+           'USE_FLIPPED': True,
+           'USE_GT': False,
+           'WEIGHT_DECAY': 0.0005},
+ 'USE_GPU_NMS': True}
+Loading model check point from output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_comb_const_adv_lambda_e-4_iter_15000.pth
+Loaded.
+im_detect: 1/500 1.108s 0.000s
+im_detect: 2/500 0.690s 0.000s
+im_detect: 3/500 0.516s 0.000s
+im_detect: 4/500 0.451s 0.000s
+im_detect: 5/500 0.405s 0.000s
+im_detect: 6/500 0.380s 0.000s
+im_detect: 7/500 0.357s 0.000s
+im_detect: 8/500 0.346s 0.000s
+im_detect: 9/500 0.332s 0.000s
+im_detect: 10/500 0.316s 0.000s
+im_detect: 11/500 0.304s 0.000s
+im_detect: 12/500 0.295s 0.000s
+im_detect: 13/500 0.293s 0.000s
+im_detect: 14/500 0.286s 0.000s
+im_detect: 15/500 0.282s 0.000s
+im_detect: 16/500 0.278s 0.000s
+im_detect: 17/500 0.283s 0.000s
+im_detect: 18/500 0.288s 0.000s
+im_detect: 19/500 0.289s 0.000s
+im_detect: 20/500 0.288s 0.000s
+im_detect: 21/500 0.286s 0.000s
+im_detect: 22/500 0.283s 0.000s
+im_detect: 23/500 0.280s 0.000s
+im_detect: 24/500 0.276s 0.000s
+im_detect: 25/500 0.273s 0.000s
+im_detect: 26/500 0.273s 0.000s
+im_detect: 27/500 0.271s 0.000s
+im_detect: 28/500 0.269s 0.000s
+im_detect: 29/500 0.267s 0.000s
+im_detect: 30/500 0.270s 0.000s
+im_detect: 31/500 0.266s 0.000s
+im_detect: 32/500 0.265s 0.000s
+im_detect: 33/500 0.266s 0.000s
+im_detect: 34/500 0.266s 0.000s
+im_detect: 35/500 0.264s 0.000s
+im_detect: 36/500 0.262s 0.000s
+im_detect: 37/500 0.262s 0.000s
+im_detect: 38/500 0.262s 0.000s
+im_detect: 39/500 0.260s 0.000s
+im_detect: 40/500 0.260s 0.000s
+im_detect: 41/500 0.261s 0.000s
+im_detect: 42/500 0.261s 0.000s
+im_detect: 43/500 0.261s 0.000s
+im_detect: 44/500 0.261s 0.000s
+im_detect: 45/500 0.260s 0.000s
+im_detect: 46/500 0.259s 0.000s
+im_detect: 47/500 0.260s 0.000s
+im_detect: 48/500 0.258s 0.000s
+im_detect: 49/500 0.258s 0.000s
+im_detect: 50/500 0.257s 0.000s
+im_detect: 51/500 0.256s 0.000s
+im_detect: 52/500 0.255s 0.000s
+im_detect: 53/500 0.255s 0.000s
+im_detect: 54/500 0.254s 0.000s
+im_detect: 55/500 0.253s 0.000s
+im_detect: 56/500 0.254s 0.000s
+im_detect: 57/500 0.253s 0.000s
+im_detect: 58/500 0.252s 0.000s
+im_detect: 59/500 0.251s 0.000s
+im_detect: 60/500 0.251s 0.000s
+im_detect: 61/500 0.250s 0.000s
+im_detect: 62/500 0.249s 0.000s
+im_detect: 63/500 0.250s 0.000s
+im_detect: 64/500 0.250s 0.000s
+im_detect: 65/500 0.249s 0.000s
+im_detect: 66/500 0.249s 0.000s
+im_detect: 67/500 0.248s 0.000s
+im_detect: 68/500 0.247s 0.000s
+im_detect: 69/500 0.247s 0.000s
+im_detect: 70/500 0.245s 0.000s
+im_detect: 71/500 0.245s 0.000s
+im_detect: 72/500 0.244s 0.000s
+im_detect: 73/500 0.244s 0.000s
+im_detect: 74/500 0.244s 0.000s
+im_detect: 75/500 0.243s 0.000s
+im_detect: 76/500 0.243s 0.000s
+im_detect: 77/500 0.244s 0.000s
+im_detect: 78/500 0.243s 0.000s
+im_detect: 79/500 0.242s 0.000s
+im_detect: 80/500 0.242s 0.000s
+im_detect: 81/500 0.242s 0.000s
+im_detect: 82/500 0.241s 0.000s
+im_detect: 83/500 0.242s 0.000s
+im_detect: 84/500 0.242s 0.000s
+im_detect: 85/500 0.242s 0.000s
+im_detect: 86/500 0.242s 0.000s
+im_detect: 87/500 0.242s 0.000s
+im_detect: 88/500 0.242s 0.000s
+im_detect: 89/500 0.241s 0.000s
+im_detect: 90/500 0.241s 0.000s
+im_detect: 91/500 0.241s 0.000s
+im_detect: 92/500 0.242s 0.000s
+im_detect: 93/500 0.242s 0.000s
+im_detect: 94/500 0.241s 0.000s
+im_detect: 95/500 0.241s 0.000s
+im_detect: 96/500 0.241s 0.000s
+im_detect: 97/500 0.242s 0.000s
+im_detect: 98/500 0.241s 0.000s
+im_detect: 99/500 0.242s 0.000s
+im_detect: 100/500 0.242s 0.000s
+im_detect: 101/500 0.241s 0.000s
+im_detect: 102/500 0.240s 0.000s
+im_detect: 103/500 0.240s 0.000s
+im_detect: 104/500 0.240s 0.000s
+im_detect: 105/500 0.240s 0.000s
+im_detect: 106/500 0.240s 0.000s
+im_detect: 107/500 0.241s 0.000s
+im_detect: 108/500 0.240s 0.000s
+im_detect: 109/500 0.241s 0.000s
+im_detect: 110/500 0.240s 0.000s
+im_detect: 111/500 0.240s 0.000s
+im_detect: 112/500 0.240s 0.000s
+im_detect: 113/500 0.239s 0.000s
+im_detect: 114/500 0.239s 0.000s
+im_detect: 115/500 0.240s 0.000s
+im_detect: 116/500 0.239s 0.000s
+im_detect: 117/500 0.239s 0.000s
+im_detect: 118/500 0.239s 0.000s
+im_detect: 119/500 0.239s 0.000s
+im_detect: 120/500 0.239s 0.000s
+im_detect: 121/500 0.239s 0.000s
+im_detect: 122/500 0.240s 0.000s
+im_detect: 123/500 0.239s 0.000s
+im_detect: 124/500 0.239s 0.000s
+im_detect: 125/500 0.239s 0.000s
+im_detect: 126/500 0.239s 0.000s
+im_detect: 127/500 0.238s 0.000s
+im_detect: 128/500 0.238s 0.000s
+im_detect: 129/500 0.238s 0.000s
+im_detect: 130/500 0.238s 0.000s
+im_detect: 131/500 0.238s 0.000s
+im_detect: 132/500 0.238s 0.000s
+im_detect: 133/500 0.238s 0.000s
+im_detect: 134/500 0.238s 0.000s
+im_detect: 135/500 0.238s 0.000s
+im_detect: 136/500 0.237s 0.000s
+im_detect: 137/500 0.237s 0.000s
+im_detect: 138/500 0.237s 0.000s
+im_detect: 139/500 0.237s 0.000s
+im_detect: 140/500 0.237s 0.000s
+im_detect: 141/500 0.236s 0.000s
+im_detect: 142/500 0.237s 0.000s
+im_detect: 143/500 0.237s 0.000s
+im_detect: 144/500 0.237s 0.000s
+im_detect: 145/500 0.237s 0.000s
+im_detect: 146/500 0.237s 0.000s
+im_detect: 147/500 0.237s 0.000s
+im_detect: 148/500 0.237s 0.000s
+im_detect: 149/500 0.237s 0.000s
+im_detect: 150/500 0.237s 0.000s
+im_detect: 151/500 0.236s 0.000s
+im_detect: 152/500 0.236s 0.000s
+im_detect: 153/500 0.237s 0.000s
+im_detect: 154/500 0.236s 0.000s
+im_detect: 155/500 0.237s 0.000s
+im_detect: 156/500 0.236s 0.000s
+im_detect: 157/500 0.237s 0.000s
+im_detect: 158/500 0.237s 0.000s
+im_detect: 159/500 0.236s 0.000s
+im_detect: 160/500 0.236s 0.000s
+im_detect: 161/500 0.236s 0.000s
+im_detect: 162/500 0.236s 0.000s
+im_detect: 163/500 0.236s 0.000s
+im_detect: 164/500 0.236s 0.000s
+im_detect: 165/500 0.236s 0.000s
+im_detect: 166/500 0.237s 0.000s
+im_detect: 167/500 0.236s 0.000s
+im_detect: 168/500 0.237s 0.000s
+im_detect: 169/500 0.237s 0.000s
+im_detect: 170/500 0.237s 0.000s
+im_detect: 171/500 0.237s 0.000s
+im_detect: 172/500 0.236s 0.000s
+im_detect: 173/500 0.236s 0.000s
+im_detect: 174/500 0.236s 0.000s
+im_detect: 175/500 0.236s 0.000s
+im_detect: 176/500 0.236s 0.000s
+im_detect: 177/500 0.236s 0.000s
+im_detect: 178/500 0.235s 0.000s
+im_detect: 179/500 0.236s 0.000s
+im_detect: 180/500 0.236s 0.000s
+im_detect: 181/500 0.236s 0.000s
+im_detect: 182/500 0.236s 0.000s
+im_detect: 183/500 0.236s 0.000s
+im_detect: 184/500 0.236s 0.000s
+im_detect: 185/500 0.236s 0.000s
+im_detect: 186/500 0.236s 0.000s
+im_detect: 187/500 0.236s 0.000s
+im_detect: 188/500 0.236s 0.000s
+im_detect: 189/500 0.236s 0.000s
+im_detect: 190/500 0.236s 0.000s
+im_detect: 191/500 0.236s 0.000s
+im_detect: 192/500 0.236s 0.000s
+im_detect: 193/500 0.235s 0.000s
+im_detect: 194/500 0.235s 0.000s
+im_detect: 195/500 0.235s 0.000s
+im_detect: 196/500 0.235s 0.000s
+im_detect: 197/500 0.235s 0.000s
+im_detect: 198/500 0.235s 0.000s
+im_detect: 199/500 0.235s 0.000s
+im_detect: 200/500 0.234s 0.000s
+im_detect: 201/500 0.235s 0.000s
+im_detect: 202/500 0.234s 0.000s
+im_detect: 203/500 0.234s 0.000s
+im_detect: 204/500 0.234s 0.000s
+im_detect: 205/500 0.234s 0.000s
+im_detect: 206/500 0.234s 0.000s
+im_detect: 207/500 0.233s 0.000s
+im_detect: 208/500 0.233s 0.000s
+im_detect: 209/500 0.234s 0.000s
+im_detect: 210/500 0.233s 0.000s
+im_detect: 211/500 0.233s 0.000s
+im_detect: 212/500 0.233s 0.000s
+im_detect: 213/500 0.233s 0.000s
+im_detect: 214/500 0.233s 0.000s
+im_detect: 215/500 0.233s 0.000s
+im_detect: 216/500 0.233s 0.000s
+im_detect: 217/500 0.233s 0.000s
+im_detect: 218/500 0.233s 0.000s
+im_detect: 219/500 0.233s 0.000s
+im_detect: 220/500 0.233s 0.000s
+im_detect: 221/500 0.233s 0.000s
+im_detect: 222/500 0.233s 0.000s
+im_detect: 223/500 0.233s 0.000s
+im_detect: 224/500 0.233s 0.000s
+im_detect: 225/500 0.233s 0.000s
+im_detect: 226/500 0.233s 0.000s
+im_detect: 227/500 0.233s 0.000s
+im_detect: 228/500 0.233s 0.000s
+im_detect: 229/500 0.234s 0.000s
+im_detect: 230/500 0.233s 0.000s
+im_detect: 231/500 0.234s 0.000s
+im_detect: 232/500 0.234s 0.000s
+im_detect: 233/500 0.233s 0.000s
+im_detect: 234/500 0.233s 0.000s
+im_detect: 235/500 0.233s 0.000s
+im_detect: 236/500 0.234s 0.000s
+im_detect: 237/500 0.234s 0.000s
+im_detect: 238/500 0.234s 0.000s
+im_detect: 239/500 0.234s 0.000s
+im_detect: 240/500 0.234s 0.000s
+im_detect: 241/500 0.234s 0.000s
+im_detect: 242/500 0.233s 0.000s
+im_detect: 243/500 0.233s 0.000s
+im_detect: 244/500 0.233s 0.000s
+im_detect: 245/500 0.233s 0.000s
+im_detect: 246/500 0.233s 0.000s
+im_detect: 247/500 0.233s 0.000s
+im_detect: 248/500 0.233s 0.000s
+im_detect: 249/500 0.233s 0.000s
+im_detect: 250/500 0.233s 0.000s
+im_detect: 251/500 0.233s 0.000s
+im_detect: 252/500 0.233s 0.000s
+im_detect: 253/500 0.233s 0.000s
+im_detect: 254/500 0.233s 0.000s
+im_detect: 255/500 0.233s 0.000s
+im_detect: 256/500 0.234s 0.000s
+im_detect: 257/500 0.233s 0.000s
+im_detect: 258/500 0.233s 0.000s
+im_detect: 259/500 0.233s 0.000s
+im_detect: 260/500 0.234s 0.000s
+im_detect: 261/500 0.234s 0.000s
+im_detect: 262/500 0.234s 0.000s
+im_detect: 263/500 0.233s 0.000s
+im_detect: 264/500 0.233s 0.000s
+im_detect: 265/500 0.233s 0.000s
+im_detect: 266/500 0.233s 0.000s
+im_detect: 267/500 0.233s 0.000s
+im_detect: 268/500 0.233s 0.000s
+im_detect: 269/500 0.233s 0.000s
+im_detect: 270/500 0.233s 0.000s
+im_detect: 271/500 0.233s 0.000s
+im_detect: 272/500 0.234s 0.000s
+im_detect: 273/500 0.233s 0.000s
+im_detect: 274/500 0.233s 0.000s
+im_detect: 275/500 0.233s 0.000s
+im_detect: 276/500 0.233s 0.000s
+im_detect: 277/500 0.233s 0.000s
+im_detect: 278/500 0.233s 0.000s
+im_detect: 279/500 0.232s 0.000s
+im_detect: 280/500 0.232s 0.000s
+im_detect: 281/500 0.232s 0.000s
+im_detect: 282/500 0.233s 0.000s
+im_detect: 283/500 0.232s 0.000s
+im_detect: 284/500 0.232s 0.000s
+im_detect: 285/500 0.232s 0.000s
+im_detect: 286/500 0.232s 0.000s
+im_detect: 287/500 0.232s 0.000s
+im_detect: 288/500 0.232s 0.000s
+im_detect: 289/500 0.232s 0.000s
+im_detect: 290/500 0.232s 0.000s
+im_detect: 291/500 0.232s 0.000s
+im_detect: 292/500 0.232s 0.000s
+im_detect: 293/500 0.232s 0.000s
+im_detect: 294/500 0.232s 0.000s
+im_detect: 295/500 0.232s 0.000s
+im_detect: 296/500 0.232s 0.000s
+im_detect: 297/500 0.232s 0.000s
+im_detect: 298/500 0.232s 0.000s
+im_detect: 299/500 0.232s 0.000s
+im_detect: 300/500 0.232s 0.000s
+im_detect: 301/500 0.232s 0.000s
+im_detect: 302/500 0.232s 0.000s
+im_detect: 303/500 0.233s 0.000s
+im_detect: 304/500 0.233s 0.000s
+im_detect: 305/500 0.232s 0.000s
+im_detect: 306/500 0.232s 0.000s
+im_detect: 307/500 0.232s 0.000s
+im_detect: 308/500 0.232s 0.000s
+im_detect: 309/500 0.232s 0.000s
+im_detect: 310/500 0.232s 0.000s
+im_detect: 311/500 0.232s 0.000s
+im_detect: 312/500 0.232s 0.000s
+im_detect: 313/500 0.232s 0.000s
+im_detect: 314/500 0.232s 0.000s
+im_detect: 315/500 0.232s 0.000s
+im_detect: 316/500 0.232s 0.000s
+im_detect: 317/500 0.232s 0.000s
+im_detect: 318/500 0.231s 0.000s
+im_detect: 319/500 0.231s 0.000s
+im_detect: 320/500 0.231s 0.000s
+im_detect: 321/500 0.231s 0.000s
+im_detect: 322/500 0.231s 0.000s
+im_detect: 323/500 0.231s 0.000s
+im_detect: 324/500 0.231s 0.000s
+im_detect: 325/500 0.231s 0.000s
+im_detect: 326/500 0.231s 0.000s
+im_detect: 327/500 0.231s 0.000s
+im_detect: 328/500 0.232s 0.000s
+im_detect: 329/500 0.232s 0.000s
+im_detect: 330/500 0.232s 0.000s
+im_detect: 331/500 0.232s 0.000s
+im_detect: 332/500 0.232s 0.000s
+im_detect: 333/500 0.232s 0.000s
+im_detect: 334/500 0.231s 0.000s
+im_detect: 335/500 0.231s 0.000s
+im_detect: 336/500 0.231s 0.000s
+im_detect: 337/500 0.231s 0.000s
+im_detect: 338/500 0.232s 0.000s
+im_detect: 339/500 0.231s 0.000s
+im_detect: 340/500 0.232s 0.000s
+im_detect: 341/500 0.231s 0.000s
+im_detect: 342/500 0.232s 0.000s
+im_detect: 343/500 0.232s 0.000s
+im_detect: 344/500 0.232s 0.000s
+im_detect: 345/500 0.232s 0.000s
+im_detect: 346/500 0.232s 0.000s
+im_detect: 347/500 0.232s 0.000s
+im_detect: 348/500 0.232s 0.000s
+im_detect: 349/500 0.232s 0.000s
+im_detect: 350/500 0.232s 0.000s
+im_detect: 351/500 0.232s 0.000s
+im_detect: 352/500 0.232s 0.000s
+im_detect: 353/500 0.232s 0.000s
+im_detect: 354/500 0.232s 0.000s
+im_detect: 355/500 0.232s 0.000s
+im_detect: 356/500 0.232s 0.000s
+im_detect: 357/500 0.232s 0.000s
+im_detect: 358/500 0.232s 0.000s
+im_detect: 359/500 0.232s 0.000s
+im_detect: 360/500 0.232s 0.000s
+im_detect: 361/500 0.232s 0.000s
+im_detect: 362/500 0.232s 0.000s
+im_detect: 363/500 0.232s 0.000s
+im_detect: 364/500 0.232s 0.000s
+im_detect: 365/500 0.232s 0.000s
+im_detect: 366/500 0.232s 0.000s
+im_detect: 367/500 0.232s 0.000s
+im_detect: 368/500 0.232s 0.000s
+im_detect: 369/500 0.232s 0.000s
+im_detect: 370/500 0.232s 0.000s
+im_detect: 371/500 0.232s 0.000s
+im_detect: 372/500 0.232s 0.000s
+im_detect: 373/500 0.232s 0.000s
+im_detect: 374/500 0.232s 0.000s
+im_detect: 375/500 0.232s 0.000s
+im_detect: 376/500 0.232s 0.000s
+im_detect: 377/500 0.232s 0.000s
+im_detect: 378/500 0.232s 0.000s
+im_detect: 379/500 0.232s 0.000s
+im_detect: 380/500 0.232s 0.000s
+im_detect: 381/500 0.232s 0.000s
+im_detect: 382/500 0.232s 0.000s
+im_detect: 383/500 0.232s 0.000s
+im_detect: 384/500 0.232s 0.000s
+im_detect: 385/500 0.232s 0.000s
+im_detect: 386/500 0.232s 0.000s
+im_detect: 387/500 0.232s 0.000s
+im_detect: 388/500 0.231s 0.000s
+im_detect: 389/500 0.232s 0.000s
+im_detect: 390/500 0.232s 0.000s
+im_detect: 391/500 0.232s 0.000s
+im_detect: 392/500 0.231s 0.000s
+im_detect: 393/500 0.231s 0.000s
+im_detect: 394/500 0.232s 0.000s
+im_detect: 395/500 0.231s 0.000s
+im_detect: 396/500 0.231s 0.000s
+im_detect: 397/500 0.231s 0.000s
+im_detect: 398/500 0.231s 0.000s
+im_detect: 399/500 0.231s 0.000s
+im_detect: 400/500 0.232s 0.000s
+im_detect: 401/500 0.232s 0.000s
+im_detect: 402/500 0.232s 0.000s
+im_detect: 403/500 0.231s 0.000s
+im_detect: 404/500 0.232s 0.000s
+im_detect: 405/500 0.232s 0.000s
+im_detect: 406/500 0.232s 0.000s
+im_detect: 407/500 0.232s 0.000s
+im_detect: 408/500 0.232s 0.000s
+im_detect: 409/500 0.232s 0.000s
+im_detect: 410/500 0.232s 0.000s
+im_detect: 411/500 0.232s 0.000s
+im_detect: 412/500 0.232s 0.000s
+im_detect: 413/500 0.232s 0.000s
+im_detect: 414/500 0.232s 0.000s
+im_detect: 415/500 0.232s 0.000s
+im_detect: 416/500 0.232s 0.000s
+im_detect: 417/500 0.232s 0.000s
+im_detect: 418/500 0.232s 0.000s
+im_detect: 419/500 0.231s 0.000s
+im_detect: 420/500 0.231s 0.000s
+im_detect: 421/500 0.231s 0.000s
+im_detect: 422/500 0.231s 0.000s
+im_detect: 423/500 0.231s 0.000s
+im_detect: 424/500 0.231s 0.000s
+im_detect: 425/500 0.231s 0.000s
+im_detect: 426/500 0.231s 0.000s
+im_detect: 427/500 0.231s 0.000s
+im_detect: 428/500 0.231s 0.000s
+im_detect: 429/500 0.231s 0.000s
+im_detect: 430/500 0.231s 0.000s
+im_detect: 431/500 0.231s 0.000s
+im_detect: 432/500 0.231s 0.000s
+im_detect: 433/500 0.231s 0.000s
+im_detect: 434/500 0.231s 0.000s
+im_detect: 435/500 0.231s 0.000s
+im_detect: 436/500 0.231s 0.000s
+im_detect: 437/500 0.231s 0.000s
+im_detect: 438/500 0.231s 0.000s
+im_detect: 439/500 0.231s 0.000s
+im_detect: 440/500 0.231s 0.000s
+im_detect: 441/500 0.231s 0.000s
+im_detect: 442/500 0.231s 0.000s
+im_detect: 443/500 0.231s 0.000s
+im_detect: 444/500 0.231s 0.000s
+im_detect: 445/500 0.231s 0.000s
+im_detect: 446/500 0.231s 0.000s
+im_detect: 447/500 0.231s 0.000s
+im_detect: 448/500 0.231s 0.000s
+im_detect: 449/500 0.231s 0.000s
+im_detect: 450/500 0.231s 0.000s
+im_detect: 451/500 0.231s 0.000s
+im_detect: 452/500 0.231s 0.000s
+im_detect: 453/500 0.231s 0.000s
+im_detect: 454/500 0.231s 0.000s
+im_detect: 455/500 0.231s 0.000s
+im_detect: 456/500 0.231s 0.000s
+im_detect: 457/500 0.231s 0.000s
+im_detect: 458/500 0.231s 0.000s
+im_detect: 459/500 0.231s 0.000s
+im_detect: 460/500 0.231s 0.000s
+im_detect: 461/500 0.231s 0.000s
+im_detect: 462/500 0.231s 0.000s
+im_detect: 463/500 0.231s 0.000s
+im_detect: 464/500 0.231s 0.000s
+im_detect: 465/500 0.231s 0.000s
+im_detect: 466/500 0.231s 0.000s
+im_detect: 467/500 0.231s 0.000s
+im_detect: 468/500 0.231s 0.000s
+im_detect: 469/500 0.231s 0.000s
+im_detect: 470/500 0.231s 0.000s
+im_detect: 471/500 0.231s 0.000s
+im_detect: 472/500 0.231s 0.000s
+im_detect: 473/500 0.231s 0.000s
+im_detect: 474/500 0.231s 0.000s
+im_detect: 475/500 0.231s 0.000s
+im_detect: 476/500 0.231s 0.000s
+im_detect: 477/500 0.231s 0.000s
+im_detect: 478/500 0.231s 0.000s
+im_detect: 479/500 0.231s 0.000s
+im_detect: 480/500 0.231s 0.000s
+im_detect: 481/500 0.231s 0.000s
+im_detect: 482/500 0.231s 0.000s
+im_detect: 483/500 0.231s 0.000s
+im_detect: 484/500 0.231s 0.000s
+im_detect: 485/500 0.231s 0.000s
+im_detect: 486/500 0.231s 0.000s
+im_detect: 487/500 0.231s 0.000s
+im_detect: 488/500 0.231s 0.000s
+im_detect: 489/500 0.231s 0.000s
+im_detect: 490/500 0.231s 0.000s
+im_detect: 491/500 0.231s 0.000s
+im_detect: 492/500 0.231s 0.000s
+im_detect: 493/500 0.231s 0.000s
+im_detect: 494/500 0.231s 0.000s
+im_detect: 495/500 0.231s 0.000s
+im_detect: 496/500 0.231s 0.000s
+im_detect: 497/500 0.231s 0.000s
+im_detect: 498/500 0.231s 0.000s
+im_detect: 499/500 0.231s 0.000s
+im_detect: 500/500 0.231s 0.000s
+Evaluating detections
+Writing car cityscapes results file
+VOC07 metric? No
+AP for car = 0.2929
+Mean AP = 0.2929
+~~~~~~~~
+Results:
+0.293
+0.293
+~~~~~~~~
+
+--------------------------------------------------------------
+Results computed with the **unofficial** Python eval code.
+Results should be very close to the official MATLAB eval code.
+Recompute with `./tools/reval.py --matlab ...` for your paper.
+-- Thanks, The Management
+--------------------------------------------------------------
+194.82user 33.89system 3:43.98elapsed 102%CPU (0avgtext+0avgdata 2196044maxresident)k
+8inputs+2582536outputs (0major+763151minor)pagefaults 0swaps

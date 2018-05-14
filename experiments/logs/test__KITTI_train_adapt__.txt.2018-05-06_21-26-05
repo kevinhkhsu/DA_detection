@@ -1,0 +1,13 @@
++ echo Logging output to experiments/logs/test__KITTI_train_adapt__.txt.2018-05-06_21-26-05
+Logging output to experiments/logs/test__KITTI_train_adapt__.txt.2018-05-06_21-26-05
++ set +x
++ [[ ! -z '' ]]
++ CUDA_VISIBLE_DEVICES=0
++ time python ./tools/test_net.py --imdb cityscapes_val --model output//KITTI_train/_adapt/_faster_rcnn_comb_const_adv_lambda_e-3_lr_e-4_iter_70000.pth --cfg experiments/cfgs/.yml --tag _adapt --net --set ANCHOR_SCALES '[4,8,16,32]' ANCHOR_RATIOS '[0.5,1,2]'
+usage: test_net.py [-h] [--cfg CFG_FILE] [--model MODEL] [--imdb IMDB_NAME]
+                   [--comp] [--num_dets MAX_PER_IMAGE] [--tag TAG] [--net NET]
+                   [--set ...]
+test_net.py: error: argument --net: expected one argument
+Command exited with non-zero status 2
+1.06user 0.60system 0:01.14elapsed 145%CPU (0avgtext+0avgdata 210792maxresident)k
+368inputs+56outputs (0major+54669minor)pagefaults 0swaps

@@ -1,0 +1,213 @@
++ echo Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-07_13-03-37
+Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-07_13-03-37
++ set +x
++ [[ ! -z '' ]]
++ CUDA_VISIBLE_DEVICES=0
++ time python ./tools/test_net.py --imdb cityscapes_val --model output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_img_1conv_iter_15000.pth --cfg experiments/cfgs/vgg16.yml --tag _adapt --net vgg16 --set ANCHOR_SCALES '[4,8,16,32]' ANCHOR_RATIOS '[0.5,1,2]'
+Called with args:
+Namespace(cfg_file='experiments/cfgs/vgg16.yml', comp_mode=False, imdb_name='cityscapes_val', max_per_image=100, model='output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_img_1conv_iter_15000.pth', net='vgg16', set_cfgs=['ANCHOR_SCALES', '[4,8,16,32]', 'ANCHOR_RATIOS', '[0.5,1,2]'], tag='_adapt')
+Using config:
+{'ADAPT_LAMBDA': 0.1,
+ 'ANCHOR_RATIOS': [0.5, 1, 2],
+ 'ANCHOR_SCALES': [4, 8, 16, 32],
+ 'DATA_DIR': '/home/kevin/Downloads',
+ 'EXP_DIR': 'vgg16',
+ 'MATLAB': 'matlab',
+ 'MOBILENET': {'DEPTH_MULTIPLIER': 1.0,
+               'FIXED_LAYERS': 5,
+               'REGU_DEPTH': False,
+               'WEIGHT_DECAY': 4e-05},
+ 'PIXEL_MEANS': array([[[ 102.9801,  115.9465,  122.7717]]]),
+ 'POOLING_MODE': 'crop',
+ 'POOLING_SIZE': 7,
+ 'RESNET': {'FIXED_BLOCKS': 1, 'MAX_POOL': False},
+ 'RNG_SEED': 3,
+ 'ROOT_DIR': '/home/disk1/DA/pytorch-faster-rcnn',
+ 'RPN_CHANNELS': 512,
+ 'TEST': {'BBOX_REG': True,
+          'HAS_RPN': True,
+          'MAX_SIZE': 1000,
+          'MODE': 'nms',
+          'NMS': 0.3,
+          'PROPOSAL_METHOD': 'gt',
+          'RPN_NMS_THRESH': 0.7,
+          'RPN_POST_NMS_TOP_N': 300,
+          'RPN_PRE_NMS_TOP_N': 6000,
+          'RPN_TOP_N': 5000,
+          'SCALES': [500],
+          'SVM': False},
+ 'TRAIN': {'ASPECT_GROUPING': False,
+           'BATCH_SIZE': 256,
+           'BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'BBOX_NORMALIZE_MEANS': [0.0, 0.0, 0.0, 0.0],
+           'BBOX_NORMALIZE_STDS': [0.1, 0.1, 0.2, 0.2],
+           'BBOX_NORMALIZE_TARGETS': True,
+           'BBOX_NORMALIZE_TARGETS_PRECOMPUTED': True,
+           'BBOX_REG': True,
+           'BBOX_THRESH': 0.5,
+           'BG_THRESH_HI': 0.5,
+           'BG_THRESH_LO': 0.0,
+           'BIAS_DECAY': False,
+           'DISPLAY': 20,
+           'DOUBLE_BIAS': True,
+           'FG_FRACTION': 0.25,
+           'FG_THRESH': 0.5,
+           'GAMMA': 0.1,
+           'HAS_RPN': True,
+           'IMS_PER_BATCH': 1,
+           'LEARNING_RATE': 0.001,
+           'MAX_SIZE': 1000,
+           'MOMENTUM': 0.9,
+           'PROPOSAL_METHOD': 'gt',
+           'RPN_BATCHSIZE': 256,
+           'RPN_BBOX_INSIDE_WEIGHTS': [1.0, 1.0, 1.0, 1.0],
+           'RPN_CLOBBER_POSITIVES': False,
+           'RPN_FG_FRACTION': 0.5,
+           'RPN_NEGATIVE_OVERLAP': 0.3,
+           'RPN_NMS_THRESH': 0.7,
+           'RPN_POSITIVE_OVERLAP': 0.7,
+           'RPN_POSITIVE_WEIGHT': -1.0,
+           'RPN_POST_NMS_TOP_N': 2000,
+           'RPN_PRE_NMS_TOP_N': 12000,
+           'SCALES': [500],
+           'SNAPSHOT_ITERS': 5000,
+           'SNAPSHOT_KEPT': 14,
+           'SNAPSHOT_PREFIX': 'vgg16_faster_rcnn_img_1conv',
+           'STEPSIZE': [30000],
+           'SUMMARY_INTERVAL': 180,
+           'TRUNCATED': False,
+           'USE_ALL_GT': True,
+           'USE_FLIPPED': True,
+           'USE_GT': False,
+           'WEIGHT_DECAY': 0.0005},
+ 'USE_GPU_NMS': True}
+Loading model check point from output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_img_1conv_iter_15000.pth
+Loaded.
+im_detect: 1/500 1.045s 0.000s
+im_detect: 2/500 0.649s 0.000s
+im_detect: 3/500 0.504s 0.000s
+im_detect: 4/500 0.424s 0.000s
+im_detect: 5/500 0.389s 0.000s
+im_detect: 6/500 0.358s 0.000s
+im_detect: 7/500 0.330s 0.000s
+im_detect: 8/500 0.321s 0.000s
+im_detect: 9/500 0.309s 0.000s
+im_detect: 10/500 0.294s 0.000s
+im_detect: 11/500 0.290s 0.000s
+im_detect: 12/500 0.284s 0.000s
+im_detect: 13/500 0.276s 0.000s
+im_detect: 14/500 0.274s 0.000s
+im_detect: 15/500 0.270s 0.000s
+im_detect: 16/500 0.266s 0.000s
+im_detect: 17/500 0.265s 0.000s
+im_detect: 18/500 0.262s 0.000s
+im_detect: 19/500 0.261s 0.000s
+im_detect: 20/500 0.259s 0.000s
+im_detect: 21/500 0.256s 0.000s
+im_detect: 22/500 0.256s 0.000s
+im_detect: 23/500 0.255s 0.000s
+im_detect: 24/500 0.252s 0.000s
+im_detect: 25/500 0.252s 0.000s
+im_detect: 26/500 0.250s 0.000s
+im_detect: 27/500 0.247s 0.000s
+im_detect: 28/500 0.247s 0.000s
+im_detect: 29/500 0.246s 0.000s
+im_detect: 30/500 0.244s 0.000s
+im_detect: 31/500 0.244s 0.000s
+im_detect: 32/500 0.243s 0.000s
+im_detect: 33/500 0.242s 0.000s
+im_detect: 34/500 0.242s 0.000s
+im_detect: 35/500 0.242s 0.000s
+im_detect: 36/500 0.241s 0.000s
+im_detect: 37/500 0.241s 0.000s
+im_detect: 38/500 0.241s 0.000s
+im_detect: 39/500 0.239s 0.000s
+im_detect: 40/500 0.240s 0.000s
+im_detect: 41/500 0.239s 0.000s
+im_detect: 42/500 0.238s 0.000s
+im_detect: 43/500 0.239s 0.000s
+im_detect: 44/500 0.238s 0.000s
+im_detect: 45/500 0.238s 0.000s
+im_detect: 46/500 0.238s 0.000s
+im_detect: 47/500 0.237s 0.000s
+im_detect: 48/500 0.237s 0.000s
+im_detect: 49/500 0.237s 0.000s
+im_detect: 50/500 0.235s 0.000s
+im_detect: 51/500 0.236s 0.000s
+im_detect: 52/500 0.235s 0.000s
+im_detect: 53/500 0.234s 0.000s
+im_detect: 54/500 0.234s 0.000s
+im_detect: 55/500 0.234s 0.000s
+im_detect: 56/500 0.233s 0.000s
+im_detect: 57/500 0.233s 0.000s
+im_detect: 58/500 0.233s 0.000s
+im_detect: 59/500 0.232s 0.000s
+im_detect: 60/500 0.233s 0.000s
+im_detect: 61/500 0.233s 0.000s
+im_detect: 62/500 0.232s 0.000s
+im_detect: 63/500 0.232s 0.000s
+im_detect: 64/500 0.232s 0.000s
+im_detect: 65/500 0.231s 0.000s
+im_detect: 66/500 0.231s 0.000s
+im_detect: 67/500 0.231s 0.000s
+im_detect: 68/500 0.230s 0.000s
+im_detect: 69/500 0.231s 0.000s
+im_detect: 70/500 0.230s 0.000s
+im_detect: 71/500 0.230s 0.000s
+im_detect: 72/500 0.230s 0.000s
+im_detect: 73/500 0.230s 0.000s
+im_detect: 74/500 0.230s 0.000s
+im_detect: 75/500 0.230s 0.000s
+im_detect: 76/500 0.230s 0.000s
+im_detect: 77/500 0.230s 0.000s
+im_detect: 78/500 0.229s 0.000s
+im_detect: 79/500 0.230s 0.000s
+im_detect: 80/500 0.229s 0.000s
+im_detect: 81/500 0.229s 0.000s
+im_detect: 82/500 0.229s 0.000s
+im_detect: 83/500 0.229s 0.000s
+im_detect: 84/500 0.229s 0.000s
+im_detect: 85/500 0.229s 0.000s
+im_detect: 86/500 0.228s 0.000s
+im_detect: 87/500 0.228s 0.000s
+im_detect: 88/500 0.228s 0.000s
+im_detect: 89/500 0.228s 0.000s
+im_detect: 90/500 0.228s 0.000s
+im_detect: 91/500 0.228s 0.000s
+im_detect: 92/500 0.228s 0.000s
+im_detect: 93/500 0.228s 0.000s
+im_detect: 94/500 0.228s 0.000s
+im_detect: 95/500 0.227s 0.000s
+im_detect: 96/500 0.228s 0.000s
+im_detect: 97/500 0.227s 0.000s
+im_detect: 98/500 0.227s 0.000s
+im_detect: 99/500 0.227s 0.000s
+im_detect: 100/500 0.227s 0.000s
+im_detect: 101/500 0.227s 0.000s
+im_detect: 102/500 0.227s 0.000s
+im_detect: 103/500 0.227s 0.000s
+im_detect: 104/500 0.227s 0.000s
+im_detect: 105/500 0.227s 0.000s
+im_detect: 106/500 0.226s 0.000s
+im_detect: 107/500 0.226s 0.000s
+im_detect: 108/500 0.226s 0.000s
+im_detect: 109/500 0.226s 0.000s
+im_detect: 110/500 0.226s 0.000s
+im_detect: 111/500 0.226s 0.000s
+im_detect: 112/500 0.225s 0.000s
+im_detect: 113/500 0.226s 0.000s
+im_detect: 114/500 0.226s 0.000s
+im_detect: 115/500 0.225s 0.000s
+im_detect: 116/500 0.226s 0.000s
+im_detect: 117/500 0.226s 0.000s
+im_detect: 118/500 0.225s 0.000s
+im_detect: 119/500 0.225s 0.000s
+im_detect: 120/500 0.226s 0.000s
+im_detect: 121/500 0.225s 0.000s
+im_detect: 122/500 0.225s 0.000s
+im_detect: 123/500 0.225s 0.000s
+im_detect: 124/500 0.225s 0.000s
+im_detect: 125/500 0.225s 0.000s
+im_detect: 126/500 0.225s 0.000s
+im_detect: 127/500 0.225s 0.000s
+im_detect: 128/500 0.225s 0.000s

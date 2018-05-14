@@ -12,7 +12,7 @@ import os
 import pickle
 import numpy as np
 
-def parse_rec(filename):
+def parse_rec_voc(filename):
   """ Parse a PASCAL VOC xml file """
   tree = ET.parse(filename)
   objects = []
@@ -31,6 +31,56 @@ def parse_rec(filename):
 
   return objects
 
+def parse_rec_KITTI(filename):
+  """ Parse KITTI"""
+  objects = []
+  with open(filename, 'r') as f:
+    objs = f.readlines()
+  numObjs = len(objs)
+  #print numObjs
+  for obj in objs:
+    obj_struct = {}
+    obj = obj.split(' ')
+    clsName = obj[0].lower().strip()
+    #print clsName
+    # if clsName not in self._classes:
+    #     gt_classes = gt_classes[:-1]
+    #     gt_trunc = gt_trunc[:-1]
+    #     gt_occlude = gt_occlude[:-1]
+    #     gt_alpha = gt_alpha[:-1]
+    #     gt_bboxes = gt_bboxes[:-1]
+    #     continue
+    trunc = float(obj[1])
+    occlude = int(obj[2])
+    alpha = float(obj[3])
+    x1 = float(obj[4])
+    y1 = float(obj[5])
+    x2 = float(obj[6])
+    y2 = float(obj[7])
+    bbox_height = y2-y1
+    if bbox_height >= 40 and occlude <= 0 and trunc <= 0.15:
+        diffLev = 1 #easy
+    elif bbox_height >=25 and occlude <= 1 and trunc <= 0.3:
+        diffLev = 2 #moderate
+    elif bbox_height >= 25 and occlude <= 2 and trunc <= 0.5:
+        diffLev = 3 #hard
+    else:
+        diffLev = 0 #ignore
+    obj_struct['name'] = clsName
+    obj_struct['difficult'] = 0 #Use all data in KITTI
+    obj_struct['diffLev'] = diffLev
+    obj_struct['bbox'] = [x1, y1, x2, y2]
+    objects.append(obj_struct)
+  return objects
+
+def parse_rec(filename):
+  if 'voc' in filename:
+    return parse_rec_voc(filename)
+  elif 'KITTI' in filename:
+    return parse_rec_KITTI(filename)
+  else:
+    import pdb
+    pdb.set_trace()
 
 def voc_ap(rec, prec, use_07_metric=False):
   """ ap = voc_ap(rec, prec, [use_07_metric])
@@ -102,7 +152,7 @@ def voc_eval(detpath,
   # first load gt
   if not os.path.isdir(cachedir):
     os.mkdir(cachedir)
-  cachefile = os.path.join(cachedir, '%s_annots.pkl' % imagesetfile)
+  cachefile = os.path.join(cachedir, '%s_annots.pkl' % 'val')
   # read list of images
   with open(imagesetfile, 'r') as f:
     lines = f.readlines()

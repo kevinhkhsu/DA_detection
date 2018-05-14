@@ -41,7 +41,7 @@ def proposal_layer(rpn_cls_prob, rpn_bbox_pred, im_info, cfg_key, _feat_stride, 
   proposals = proposals[order.data, :]
 
   # Non-maximal suppression
-  keep = nms(torch.cat((proposals, scores), 1).data, nms_thresh)
+  keep = nms(torch.cat((proposals, scores), 1).data, nms_thresh) #error
 
   # Pick th top region proposals after NMS
   if post_nms_topN > 0:

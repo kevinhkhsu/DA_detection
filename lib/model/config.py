@@ -18,6 +18,9 @@ cfg = __C
 #
 __C.TRAIN = edict()
 
+# Adapt Lambda
+__C.ADAPT_LAMBDA = 1e-1
+
 # Initial learning rate
 __C.TRAIN.LEARNING_RATE = 0.001
 
@@ -25,7 +28,7 @@ __C.TRAIN.LEARNING_RATE = 0.001
 __C.TRAIN.MOMENTUM = 0.9
 
 # Weight decay, for regularization
-__C.TRAIN.WEIGHT_DECAY = 0.0001
+__C.TRAIN.WEIGHT_DECAY = 0.0005 #0.0001
 
 # Factor for reducing the learning rate
 __C.TRAIN.GAMMA = 0.1
@@ -53,14 +56,14 @@ __C.TRAIN.USE_GT = False
 __C.TRAIN.ASPECT_GROUPING = False
 
 # The number of snapshots kept, older ones are deleted to save space
-__C.TRAIN.SNAPSHOT_KEPT = 3
+__C.TRAIN.SNAPSHOT_KEPT = 14
 
 # The time interval for saving tensorflow summaries
 __C.TRAIN.SUMMARY_INTERVAL = 180
 
 # Scale to use during training (can list multiple scales)
 # The scale is the pixel size of an image's shortest side
-__C.TRAIN.SCALES = (600,)
+__C.TRAIN.SCALES = (500,)#(600,)
 
 # Max pixel size of the longest side of a scaled input image
 __C.TRAIN.MAX_SIZE = 1000
@@ -97,7 +100,7 @@ __C.TRAIN.SNAPSHOT_ITERS = 5000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
-__C.TRAIN.SNAPSHOT_PREFIX = 'res101_faster_rcnn'
+__C.TRAIN.SNAPSHOT_PREFIX = 'vgg16_faster_rcnn'
 
 # Normalize the targets (subtract empirical mean, divide by empirical stddev)
 __C.TRAIN.BBOX_NORMALIZE_TARGETS = True
@@ -166,7 +169,7 @@ __C.TEST = edict()
 
 # Scale to use during testing (can NOT list multiple scales)
 # The scale is the pixel size of an image's shortest side
-__C.TEST.SCALES = (600,)
+__C.TEST.SCALES = (500,)#(600,)
 
 # Max pixel size of the longest side of a scaled input image
 __C.TEST.MAX_SIZE = 1000
@@ -258,7 +261,8 @@ __C.RNG_SEED = 3
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 
 # Data directory
-__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
+#__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
+__C.DATA_DIR = osp.abspath('/home/kevin/Downloads/')
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'
@@ -348,6 +352,7 @@ def _merge_a_into_b(a, b):
         raise
     else:
       b[k] = v
+      setattr(b, k, v)
 
 
 def cfg_from_file(filename):
@@ -380,3 +385,4 @@ def cfg_from_list(cfg_list):
       'type {} does not match original type {}'.format(
         type(value), type(d[subkey]))
     d[subkey] = value
+    setattr(d, subkey, value)

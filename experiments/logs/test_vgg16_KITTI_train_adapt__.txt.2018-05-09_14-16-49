@@ -1,0 +1,6 @@
++ echo Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-09_14-16-49
+Logging output to experiments/logs/test_vgg16_KITTI_train_adapt__.txt.2018-05-09_14-16-49
++ set +x
++ [[ ! -z '' ]]
++ CUDA_VISIBLE_DEVICES=0
++ time python ./tools/test_net.py --imdb cityscapes_val --model output/vgg16/KITTI_train/_adapt/vgg16_faster_rcnn_img_ADAM_iter_10000.pth --cfg experiments/cfgs/vgg16.yml --tag _adapt --net vgg16 --set ANCHOR_SCALES '[4,8,16,32]' ANCHOR_RATIOS '[0.5,1,2]'

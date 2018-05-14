@@ -50,4 +50,8 @@ class vgg16(Network):
     return fc7
 
   def load_pretrained_cnn(self, state_dict):
-    self.vgg.load_state_dict({k:v for k,v in state_dict.items() if k in self.vgg.state_dict()})
+    netDict = self.state_dict()
+    stateDict = {k: v for k, v in state_dict.items() if k in netDict}
+    netDict.update(state_dict)
+    nn.Module.load_state_dict(self, netDict)
+    #self.vgg.load_state_dict({k:v for k,v in state_dict.items() if k in self.vgg.state_dict()})
