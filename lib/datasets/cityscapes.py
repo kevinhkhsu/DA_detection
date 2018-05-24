@@ -268,7 +268,6 @@ class cityscapes(imdb):
       rec, prec, ap = cityscapes_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
-      print(rec[75], prec[75])
       pl.plot(rec, prec, lw=2, 
               label='Precision-recall curve of class {} (ap = {:.4f})'
               ''.format(cls, ap))

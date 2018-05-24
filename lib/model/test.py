@@ -136,6 +136,7 @@ def apply_nms(all_boxes, thresh):
         continue
       nms_boxes[cls_ind][im_ind] = dets[keep, :].copy()
   return nms_boxes
+  
 def draw_car_bb(im, bboxes, scores=[], thr=0.3, type='det'):
     bboxes = bboxes.astype(int)
     imgcv = np.copy(im)
@@ -163,7 +164,7 @@ def draw_car_bb(im, bboxes, scores=[], thr=0.3, type='det'):
 
 
 def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
-  vis = False
+  vis = True
 
   np.random.seed(cfg.RNG_SEED)
   """Test a Fast R-CNN network on an image database."""
@@ -229,7 +230,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
 
       #draw detected boxes
       im2show = draw_car_bb(im2show, np.squeeze(all_boxes[1][i][:, :-1]), np.squeeze(all_boxes[1][i][:,-1])) #draw class 1: car
-      cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/img_20000/'+imdb.image_index[i]+'.png', im2show)
+      cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/'+imdb.image_index[i]+'.png', im2show)
       #cv2.imshow('test', im2show)
       #cv2.waitKey(0)
       

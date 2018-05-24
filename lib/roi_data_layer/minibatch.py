@@ -29,7 +29,7 @@ def get_minibatch(roidb, num_classes):
     format(num_images, cfg.TRAIN.BATCH_SIZE)
 
   # Get the input image blob, formatted for caffe
-  im_blob, im_scales, im_path = _get_image_blob(roidb, random_scale_inds)
+  im_blob, im_scales, im_path, orig_imshape = _get_image_blob(roidb, random_scale_inds)
 
   blobs = {'data': im_blob}
   blobs['data_path'] = im_path
@@ -49,7 +49,7 @@ def get_minibatch(roidb, num_classes):
   gt_boxes[:, 4] = roidb[0]['gt_classes'][gt_inds]
   blobs['gt_boxes'] = gt_boxes
   blobs['im_info'] = np.array(
-    [im_blob.shape[1], im_blob.shape[2], im_scales[0]],
+    [im_blob.shape[1], im_blob.shape[2], im_scales[0], orig_imshape[0], orig_imshape[1], orig_imshape[2]],
     dtype=np.float32)
 
   return blobs
@@ -64,6 +64,7 @@ def _get_image_blob(roidb, scale_inds):
   im_path = []
   for i in range(num_images):
     im = cv2.imread(roidb[i]['image'])
+    orig_imshape = im.shape
     im_path.append(roidb[i]['image'])
     if roidb[i]['flipped']:
       im = im[:, ::-1, :]
@@ -76,4 +77,4 @@ def _get_image_blob(roidb, scale_inds):
   # Create a blob to hold the input images
   blob = im_list_to_blob(processed_ims)
 
-  return blob, im_scales, im_path
+  return blob, im_scales, im_path, orig_imshape

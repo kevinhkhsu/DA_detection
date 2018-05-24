@@ -135,7 +135,10 @@ class SolverWrapper(object):
     # Set learning rate and momentum
     lr = cfg.TRAIN.LEARNING_RATE
     params = []
+
     for key, value in dict(self.net.named_parameters()).items():
+      if 'D_inst' in key or 'D_img' in key or 'decoder' in key:
+        continue
       if value.requires_grad:
         if 'bias' in key:
           params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
@@ -143,10 +146,10 @@ class SolverWrapper(object):
           params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
     self.optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM)
 
-    # self.D_inst_op = torch.optim.SGD(self.net.D_inst.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
-    # self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
-    self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/4., betas=(0.9, 0.99))
-    self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/4., betas=(0.9, 0.99))
+    self.D_inst_op = torch.optim.SGD(self.net.D_inst.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+    self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+    # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/4., betas=(0.9, 0.99))
+    # self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/4., betas=(0.9, 0.99))
 
     self.decoder_op = torch.optim.Adam(self.net.decoder.parameters(), lr=0.0001, betas=(0.9, 0.99))
     # Write the train and validation information to tensorboard
@@ -291,6 +294,8 @@ class SolverWrapper(object):
         # Compute the graph without summary
         rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
           self.net.train_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)  
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \
         #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_inst_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, recon_loss = \
@@ -305,8 +310,8 @@ class SolverWrapper(object):
               # '>>> D_img_loss_adv_T: %.6f\n >>> D_inst_loss_adv_T: %.6f\n >>> D_const_loss_adv_T: %.6f\n '
               '>>> D_img_loss_S: %.6f\n >>> D_inst_loss_S: %.6f\n >>> D_const_loss_S: %.6f\n '
               '>>> D_img_loss_T: %.6f\n >>> D_inst_loss_T: %.6f\n >>> D_const_loss_T: %.6f\n '
-              '>>> lambda: %f >>> lr: %f '
-              '>>> ADAM_lr: %f' % \
+              '>>> lambda: %f >>> lr: %f ' %\
+              #'>>> ADAM_lr: %f' % \
               # '>>> recon_loss: %.6f\n >>> lr: %f' % \
               (iter, max_iters, total_loss, rpn_loss_cls, \
                 rpn_loss_box, loss_cls, loss_box, \
@@ -314,7 +319,7 @@ class SolverWrapper(object):
                 D_img_loss_S, D_inst_loss_S, D_const_loss_S, \
                 D_img_loss_T, D_inst_loss_T, D_const_loss_T,\
                 # recon_loss, \
-                cfg.ADAPT_LAMBDA, lr, lr/4.))
+                cfg.ADAPT_LAMBDA, lr))#, lr/4.))
         print('speed: {:.3f}s / iter'.format(utils.timer.timer.average_time()))
 
         # for k in utils.timer.timer._average_time.keys():
