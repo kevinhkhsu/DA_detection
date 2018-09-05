@@ -38,12 +38,10 @@ class SolverWrapper(object):
     A wrapper class for the training process
   """
 
-  def __init__(self, network, imdb, roidb, imdb_T, roidb_T, valroidb, output_dir, tbdir, pretrained_model=None):
+  def __init__(self, network, imdb, roidb, valroidb, output_dir, tbdir, pretrained_model=None):
     self.net = network
     self.imdb = imdb
     self.roidb = roidb
-    self.imdb_T = imdb_T
-    self.roidb_T = roidb_T
     self.valroidb = valroidb
     self.output_dir = output_dir
     self.tbdir = tbdir
@@ -78,10 +76,6 @@ class SolverWrapper(object):
     cur_val = self.data_layer_val._cur
     # current shuffled indexes of the validation database
     perm_val = self.data_layer_val._perm
-    # current position in the database
-    curT = self.data_layer_T._cur
-    # current shuffled indexes of the database
-    permT = self.data_layer_T._perm
 
     # Dump the meta info
     with open(nfilename, 'wb') as fid:
@@ -90,8 +84,6 @@ class SolverWrapper(object):
       pickle.dump(perm, fid, pickle.HIGHEST_PROTOCOL)
       pickle.dump(cur_val, fid, pickle.HIGHEST_PROTOCOL)
       pickle.dump(perm_val, fid, pickle.HIGHEST_PROTOCOL)
-      pickle.dump(curT, fid, pickle.HIGHEST_PROTOCOL)
-      pickle.dump(permT, fid, pickle.HIGHEST_PROTOCOL)
       pickle.dump(iter, fid, pickle.HIGHEST_PROTOCOL)
 
     return filename, nfilename
@@ -109,8 +101,6 @@ class SolverWrapper(object):
       perm = pickle.load(fid)
       cur_val = pickle.load(fid)
       perm_val = pickle.load(fid)
-      curT = pickle.load(fid)
-      permT = pickle.load(fid)
       last_snapshot_iter = pickle.load(fid)
 
       np.random.set_state(st0)
@@ -118,8 +108,6 @@ class SolverWrapper(object):
       self.data_layer._perm = perm
       self.data_layer_val._cur = cur_val
       self.data_layer_val._perm = perm_val
-      self.data_layer_T._cur = curT
-      self.data_layer_T._perm = permT
 
     return last_snapshot_iter
 
@@ -135,27 +123,13 @@ class SolverWrapper(object):
     # Set learning rate and momentum
     lr = cfg.TRAIN.LEARNING_RATE
     params = []
-
     for key, value in dict(self.net.named_parameters()).items():
-      if 'D_inst' in key or 'D_img' in key or 'decoder' in key:
-        continue
-
       if value.requires_grad:
-        print(key)
         if 'bias' in key:
-          params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
+          params += [{'params':[value],'lr':lr*(cfg.TRAIN.DOUBLE_BIAS + 1), 'weight_decay': cfg.TRAIN.BIAS_DECAY and cfg.TRAIN.WEIGHT_DECAY or 0}]
         else:
           params += [{'params':[value],'lr':lr, 'weight_decay': cfg.TRAIN.WEIGHT_DECAY}]
     self.optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM)
-
-    self.D_inst_op = torch.optim.SGD(self.net.D_inst.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
-    self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
-    # self.D_img_branch_op = torch.optim.SGD(self.net.D_img_domain.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
-
-    # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/2., betas=(0.9, 0.99))
-    # self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/2., betas=(0.9, 0.99))
-
-    # self.decoder_op = torch.optim.Adam(self.net.decoder.parameters(), lr=0.0001, betas=(0.9, 0.99))
     # Write the train and validation information to tensorboard
     self.writer = tb.writer.FileWriter(self.tbdir)
     self.valwriter = tb.writer.FileWriter(self.tbvaldir)
@@ -233,12 +207,11 @@ class SolverWrapper(object):
       # where the naming tradition for checkpoints are different
       os.remove(str(sfile))
       ss_paths.remove(sfile)
-    
+
   def train_model(self, max_iters):
     # Build data layers for both training and validation set
     self.data_layer = RoIDataLayer(self.roidb, self.imdb.num_classes)
     self.data_layer_val = RoIDataLayer(self.valroidb, self.imdb.num_classes, random=True)
-    self.data_layer_T = RoIDataLayer(self.roidb_T, self.imdb.num_classes)
 
     # Construct the computation graph
     lr, train_op = self.construct_graph()
@@ -262,12 +235,6 @@ class SolverWrapper(object):
     self.net.train()
     self.net.cuda()
 
-    self.net.D_img.train()
-    self.net.D_img.cuda()
-
-    self.net.D_inst.train()
-    self.net.D_inst.cuda()
-
     while iter < max_iters + 1:
       # Learning rate
       if iter == next_stepsize + 1:
@@ -275,69 +242,45 @@ class SolverWrapper(object):
         self.snapshot(iter)
         lr *= cfg.TRAIN.GAMMA
         scale_lr(self.optimizer, cfg.TRAIN.GAMMA)
-        # scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
-        # scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
         next_stepsize = stepsizes.pop()
 
       utils.timer.timer.tic()
-      # Get training data, one batch at a time
-      blobs = self.data_layer.forward()
-      blobsT = self.data_layer_T.forward()
+      iter_steps = 2
+      rpn_loss_clsF, rpn_loss_boxF, loss_clsF, loss_boxF, total_lossF =0.,0.,0.,0.,0. 
 
-      now = time.time()
-      #if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
-      if False: 
-        # Compute the graph with summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, summary = \
-          self.net.train_adapt_step_with_summary(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        for _sum in summary: self.writer.add_summary(_sum, float(iter))
-        # Also check the summary on the validation set
-        blobs_val = self.data_layer_val.forward()
-        summary_val = self.net.get_summary(blobs_val)
-        for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
-        last_summary_time = now
-      else:
-        # Compute the graph without summary
-        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \
-        #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T, \
-        #   recon_loss_S, recon_loss_T = \
-        #   self.net.train_reconstruct_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op, self.decoder_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T = \
-        #   self.net.train_adapt_step_branch(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op)
+      self.optimizer.zero_grad()
+      for it in range(iter_steps):
+        # Get training data, one batch at a time
+        blobs = self.data_layer.forward()
+
+        now = time.time()
+        if False:#iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
+          # Compute the graph with summary
+          rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, summary = \
+            self.net.train_step_with_summary(blobs, self.optimizer)
+          for _sum in summary: self.writer.add_summary(_sum, float(iter))
+          # Also check the summary on the validation set
+          blobs_val = self.data_layer_val.forward()
+          summary_val = self.net.get_summary(blobs_val)
+          for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
+          last_summary_time = now
+        else:
+          # Compute the graph without summary
+          rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss = \
+            self.net.train_step_subIters(blobs, self.optimizer)
+        rpn_loss_boxF += (rpn_loss_box/float(iter_steps))
+        loss_clsF += (loss_cls/float(iter_steps))
+        loss_boxF += (loss_box/float(iter_steps))
+        total_lossF += (total_loss/float(iter_steps))
+        rpn_loss_clsF += (rpn_loss_cls/float(iter_steps))
       utils.timer.timer.toc()
+      self.optimizer.step()
 
-      # total_loss += D_inst_loss_S + D_img_loss_S + D_const_loss_S + D_inst_loss_T + D_img_loss_T + D_const_loss_T
       # Display training information
       if iter % (cfg.TRAIN.DISPLAY) == 0:
         print('iter: %d / %d, total loss: %.6f\n >>> rpn_loss_cls: %.6f\n '
-              '>>> rpn_loss_box: %.6f\n >>> loss_cls: %.6f\n >>> loss_box: %.6f\n '
-              # '>>> D_img_loss_adv_T: %.6f\n >>> D_inst_loss_adv_T: %.6f\n >>> D_const_loss_adv_T: %.6f\n '
-              '>>> D_img_loss_S: %.6f\n >>> D_inst_loss_S: %.6f\n >>> D_const_loss_S: %.6f\n '
-              '>>> D_img_loss_T: %.6f\n >>> D_inst_loss_T: %.6f\n >>> D_const_loss_T: %.6f\n '
-              # '>>> D_img_domain_loss_S: %.6f\n >>> D_img_domain_loss_T: %.6f\n >>> loss_diff_S: %.6f\n >>> loss_diff_T: %.6f\n'
-              # '>>> recon_loss_S: %.6f\n >>> recon_loss_T: %.6f\n'
-              '>>> lambda: %f >>> lr: %f ' % \
-              # '>>> ADAM_lr: %f' % \
-              # '>>> recon_loss: %.6f\n >>> lr: %f' % \
-              (iter, max_iters, total_loss, rpn_loss_cls, \
-                rpn_loss_box, loss_cls, loss_box, \
-                # D_img_loss_adv_T, D_inst_loss_adv_T, D_const_loss_adv_T, \
-                D_img_loss_S, D_inst_loss_S, D_const_loss_S, \
-                D_img_loss_T, D_inst_loss_T, D_const_loss_T, \
-                # loss_D_img_domain_S, loss_D_img_domain_T, loss_diff_S, loss_diff_T, \
-                # recon_loss_S, recon_loss_T, \
-                cfg.ADAPT_LAMBDA, lr))#, lr/4.))
+              '>>> rpn_loss_box: %.6f\n >>> loss_cls: %.6f\n >>> loss_box: %.6f\n >>> lr: %f' % \
+              (iter, max_iters, total_lossF, rpn_loss_clsF, rpn_loss_boxF, loss_clsF, loss_boxF, lr))
         print('speed: {:.3f}s / iter'.format(utils.timer.timer.average_time()))
 
         # for k in utils.timer.timer._average_time.keys():
@@ -403,16 +346,14 @@ def filter_roidb(roidb):
   return filtered_roidb
 
 
-def train_net(network, imdb, roidb, imdb_T, roidb_T, valroidb, output_dir, tb_dir,
+def train_net(network, imdb, roidb, valroidb, output_dir, tb_dir,
               pretrained_model=None,
               max_iters=40000):
   """Train a Faster R-CNN network."""
   roidb = filter_roidb(roidb)
   valroidb = filter_roidb(valroidb)
 
-  roidb_T = filter_roidb(roidb_T)
-
-  sw = SolverWrapper(network, imdb, roidb, imdb_T, roidb_T, valroidb, output_dir, tb_dir,
+  sw = SolverWrapper(network, imdb, roidb, valroidb, output_dir, tb_dir,
                      pretrained_model=pretrained_model)
 
   print('Solving...')
