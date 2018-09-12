@@ -47,7 +47,7 @@ for split in ['train', 'val', 'fake', 'fakereal']:
   __sets[name] = (lambda split=split, year=year: KITTI(split))
 
 # Set up cityscapes
-for split in ['train', 'val', 'fake']:
+for split in ['train', 'val', 'faketrain', 'fakeval']:
   name = 'cityscapes_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: cityscapes(split))
 

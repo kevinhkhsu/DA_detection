@@ -8,10 +8,11 @@ export PYTHONUNBUFFERED="True"
 GPU_ID=$1
 DATASET=$2
 NET=$3
+TEST_ITER=$4
 
 array=( $@ )
 len=${#array[@]}
-EXTRA_ARGS=${array[@]:3:$len}
+EXTRA_ARGS=${array[@]:4:$len}
 EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 
 case ${DATASET} in
@@ -20,7 +21,7 @@ case ${DATASET} in
     TRAIN_IMDB_T="KITTI_fake"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
-    ITERS=50000
+    ITERS=${TEST_ITER}
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
@@ -29,8 +30,8 @@ case ${DATASET} in
     TRAIN_IMDB_T="KITTI_train"
     TEST_IMDB="KITTI_val"
     STEPSIZE="[50000]"
-    ITERS=30000
-    ANCHORS="[8,16,32]"
+    ITERS=${TEST_ITER}
+    ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   *)
@@ -47,7 +48,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_imnet_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_K2synthC_retrain_iter_${ITERS}.pth
 fi
 
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then

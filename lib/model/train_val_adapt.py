@@ -152,8 +152,8 @@ class SolverWrapper(object):
     self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
     # self.D_img_branch_op = torch.optim.SGD(self.net.D_img_domain.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
 
-    # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/4., betas=(0.9, 0.99))
-    # self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/4., betas=(0.9, 0.99))
+    # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/2., betas=(0.9, 0.99))
+    # self.D_img_op = optim.Adam(self.net.D_img.parameters(), lr=lr/2., betas=(0.9, 0.99))
 
     # self.decoder_op = torch.optim.Adam(self.net.decoder.parameters(), lr=0.0001, betas=(0.9, 0.99))
     # Write the train and validation information to tensorboard
@@ -275,6 +275,8 @@ class SolverWrapper(object):
         self.snapshot(iter)
         lr *= cfg.TRAIN.GAMMA
         scale_lr(self.optimizer, cfg.TRAIN.GAMMA)
+        #scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
+        #scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
         next_stepsize = stepsizes.pop()
 
       utils.timer.timer.tic()
@@ -296,10 +298,12 @@ class SolverWrapper(object):
         last_summary_time = now
       else:
         # Compute the graph without summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #  self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+         self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \

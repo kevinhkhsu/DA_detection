@@ -232,9 +232,11 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   if vis and 'cityscapes' in imdb.name:
     gt_roidb = [imdb._load_cityscapes_annotation(index)
                   for index in imdb.image_index]
+    annot_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl'
   elif vis and 'KITTI' in imdb.name:
     gt_roidb = [imdb._load_kitti_annotation(index)
               for index in imdb.image_index]
+    annot_path = '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
   else:
     gt_roidb = None
 
@@ -244,7 +246,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   if not os.path.isdir('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/'):
     os.makedirs('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/')
 
-  with open('/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl', 'rb') as f:
+  with open(annot_path, 'rb') as f:
     try:
       recs = pickle.load(f)
     except:
@@ -269,7 +271,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   for i in range(num_images):
     im = cv2.imread(imdb.image_path_at(i))
     #im = cv2.resize(im, None, fx=2, fy=2)
-    print(imdb.image_path_at(i))
+    #print(imdb.image_path_at(i))
     _t['im_detect'].tic()
     scores, boxes = im_detect(net, im)
     _t['im_detect'].toc()
@@ -314,7 +316,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
     #  keep2 = np.where(original_all_boxes[j][i][:, -1] >= 0.)[0]
     #  print(len(keep2), len(original_all_boxes[j][i][:, -1]))
     #  original_all_boxes[j][i] = original_all_boxes[j][i][keep2, :]
-    print(len(original_all_boxes[j][i][:,-1]))
+    #print(len(original_all_boxes[j][i][:,-1]))
     _t['misc'].toc()
     
     print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
@@ -323,17 +325,17 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
 
     if vis and gt_roidb:
       ov_th, und_th, gt_left = split_bbox(original_all_boxes[1][i], imdb.image_index[i], class_recs)
-      print(len(ov_th), len(und_th), len(gt_left))
+      #print(len(ov_th), len(und_th), len(gt_left))
       #gt>=0.5
       if len(ov_th) > 0:
         bbs = np.where(ov_th[:,-1] >= 0.5)
         bbs = ov_th[bbs]
-        print('ov_th, obj>=0.5', len(bbs))
+        #print('ov_th, obj>=0.5', len(bbs))
         ovth_objov += len(bbs)
         # im_ov_th = draw_car_bb(im, bbs[:,:-1], bbs[:,-1], thr=0.)
         bbs = np.where(ov_th[:,-1] < 0.5)
         bbs = ov_th[bbs]
-        print('ov_th, obj<0.5', len(bbs))
+        #print('ov_th, obj<0.5', len(bbs))
         ovth_objund += len(bbs)
         # im_ov_th = draw_car_bb(im_ov_th, bbs[:,:-1], bbs[:,-1], color_type='2', thr=0.)
       else:
@@ -343,12 +345,12 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
       #gt<0.5      
       bbs = np.where(und_th[:,-1] >= 0.5)
       bbs = und_th[bbs]
-      print('und_th, obj>=0.5', len(bbs))
+      #print('und_th, obj>=0.5', len(bbs))
       undth_objov += len(bbs)
       # im_und_th = draw_car_bb(im, bbs[:,:-1], bbs[:,-1], thr=0.)
       bbs = np.where(und_th[:,-1] < 0.5)
       bbs = und_th[bbs]
-      print('und_th, obj<0.5', len(bbs))
+      #print('und_th, obj<0.5', len(bbs))
       undth_objund += len(bbs)
       # im_und_th = draw_car_bb(im_und_th, bbs[:,:-1], bbs[:,-1], color_type='2', thr=0.)
       # cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/indomain_und_0.5_dets/'+imdb.image_index[i]+'.png', im_und_th)
