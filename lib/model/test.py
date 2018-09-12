@@ -243,10 +243,11 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
-  if not os.path.isdir('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/'):
-    os.makedirs('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/')
+  if not os.path.isdir('/home/disk/DA/pytorch-faster-rcnn/vis/xx/'):
+    os.makedirs('/home/disk/DA/pytorch-faster-rcnn/vis/xx/')
 
-  with open(annot_path, 'rb') as f:
+  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
+  with open(annots_path, 'rb') as f:
     try:
       recs = pickle.load(f)
     except:

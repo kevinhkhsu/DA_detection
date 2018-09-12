@@ -275,50 +275,68 @@ class SolverWrapper(object):
         self.snapshot(iter)
         lr *= cfg.TRAIN.GAMMA
         scale_lr(self.optimizer, cfg.TRAIN.GAMMA)
-        #scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
-        #scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
+        scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
+        scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
         next_stepsize = stepsizes.pop()
 
+      iter_steps = 2
+      self.optimizer.zero_grad()
+      self.D_inst_op.zero_grad()
+      self.D_img_op.zero_grad()
+      rpn_loss_clsF, rpn_loss_boxF, loss_clsF, loss_boxF, total_lossF, D_inst_loss_SF, D_img_loss_SF, D_const_loss_SF, D_inst_loss_TF, D_img_loss_TF, D_const_loss_TF =0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0. 
       utils.timer.timer.tic()
-      # Get training data, one batch at a time
-      blobs = self.data_layer.forward()
-      blobsT = self.data_layer_T.forward()
+      for it in range(iter_steps):
+        # Get training data, one batch at a time
+        blobs = self.data_layer.forward()
+        blobsT = self.data_layer_T.forward()
 
-      now = time.time()
-      #if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
-      if False: 
-        # Compute the graph with summary
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, summary = \
-          self.net.train_adapt_step_with_summary(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        for _sum in summary: self.writer.add_summary(_sum, float(iter))
-        # Also check the summary on the validation set
-        blobs_val = self.data_layer_val.forward()
-        summary_val = self.net.get_summary(blobs_val)
-        for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
-        last_summary_time = now
-      else:
-        # Compute the graph without summary
-        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #  self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \
-        #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T, \
-        #   recon_loss_S, recon_loss_T = \
-        #   self.net.train_reconstruct_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op, self.decoder_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T = \
-        #   self.net.train_adapt_step_branch(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op)
+        now = time.time()
+        #if iter == 1 or now - last_summary_time > cfg.TRAIN.SUMMARY_INTERVAL:
+        if False: 
+          # Compute the graph with summary
+          rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, summary = \
+            self.net.train_adapt_step_with_summary(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          for _sum in summary: self.writer.add_summary(_sum, float(iter))
+          # Also check the summary on the validation set
+          blobs_val = self.data_layer_val.forward()
+          summary_val = self.net.get_summary(blobs_val)
+          for _sum in summary_val: self.valwriter.add_summary(_sum, float(iter))
+          last_summary_time = now
+        else:
+          # Compute the graph without summary
+          #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+          #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+          #   self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+            self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+          #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+          #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \
+          #   self.net.train_adapt_adversarial_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T, \
+          #   recon_loss_S, recon_loss_T = \
+          #   self.net.train_reconstruct_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op, self.decoder_op)
+          # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, loss_diff_S, loss_diff_T, loss_D_img_domain_S, loss_D_img_domain_T = \
+          #   self.net.train_adapt_step_branch(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_branch_op)
+        rpn_loss_clsF += (rpn_loss_cls/float(iter_steps))
+        rpn_loss_boxF += (rpn_loss_box/float(iter_steps))
+        loss_clsF += (loss_cls/float(iter_steps))
+        loss_boxF += (loss_box/float(iter_steps))
+        total_lossF += (total_loss/float(iter_steps))
+        D_inst_loss_SF += (D_inst_loss_S/float(iter_steps))
+        D_img_loss_SF += (D_img_loss_SF/float(iter_steps))
+        D_const_loss_SF += (D_const_loss_SF/float(iter_steps))
+        D_inst_loss_TF += (D_inst_loss_TF/float(iter_steps))
+        D_img_loss_TF += (D_img_loss_TF/float(iter_steps))
+        D_const_loss_TF += (D_const_loss_TF/float(iter_steps))
+      
       utils.timer.timer.toc()
-
+      self.optimizer.step()
+      self.D_inst_op.step()
+      self.D_img_op.step()
       # total_loss += D_inst_loss_S + D_img_loss_S + D_const_loss_S + D_inst_loss_T + D_img_loss_T + D_const_loss_T
       # Display training information
       if iter % (cfg.TRAIN.DISPLAY) == 0:
@@ -332,11 +350,11 @@ class SolverWrapper(object):
               '>>> lambda: %f >>> lr: %f ' % \
               # '>>> ADAM_lr: %f' % \
               # '>>> recon_loss: %.6f\n >>> lr: %f' % \
-              (iter, max_iters, total_loss, rpn_loss_cls, \
-                rpn_loss_box, loss_cls, loss_box, \
+              (iter, max_iters, total_lossF, rpn_loss_clsF, \
+                rpn_loss_boxF, loss_clsF, loss_boxF, \
                 # D_img_loss_adv_T, D_inst_loss_adv_T, D_const_loss_adv_T, \
-                D_img_loss_S, D_inst_loss_S, D_const_loss_S, \
-                D_img_loss_T, D_inst_loss_T, D_const_loss_T, \
+                D_img_loss_SF, D_inst_loss_SF, D_const_loss_SF, \
+                D_img_loss_TF, D_inst_loss_TF, D_const_loss_TF, \
                 # loss_D_img_domain_S, loss_D_img_domain_T, loss_diff_S, loss_diff_T, \
                 # recon_loss_S, recon_loss_T, \
                 cfg.ADAPT_LAMBDA, lr))#, lr/4.))
