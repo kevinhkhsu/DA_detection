@@ -212,7 +212,7 @@ def split_bbox(bbox, imgname, class_recs):
   return np.array(ov_th), np.array(und_th), BBGT[gt_left] # N, box+score
 
 def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
-  vis = True
+  vis = False
 
   np.random.seed(cfg.RNG_SEED)
   """Test a Fast R-CNN network on an image database."""
