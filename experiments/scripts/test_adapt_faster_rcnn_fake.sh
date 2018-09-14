@@ -20,7 +20,7 @@ case ${DATASET} in
     TRAIN_IMDB_T="cityscapes_train"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
-    ITERS=10000
+    ITERS=30000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
@@ -47,7 +47,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img_synthC_fromK2synthC_old_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB_S}/_adapt/${NET}_faster_rcnn_img+inst_synthC2C_from_K2synthC_retrainX_iter_${ITERS}.pth
 fi
 
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then

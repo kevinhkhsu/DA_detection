@@ -37,7 +37,14 @@ class cityscapes(imdb):
     self._devkit_path = self._get_default_path()
     self._data_path = os.path.join(self._devkit_path)
     self._classes = ('__background__',  # always index 0
-                     'car')
+                     'person',
+                     'rider',
+                     'car',
+                     'truck',
+                     'bus',
+                     'train',
+                     'motorcycle',
+                     'bicycle')
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
     self._image_ext = '.png'
     self._image_index = self._load_image_set_index()
@@ -62,15 +69,23 @@ class cityscapes(imdb):
     """
     Return the absolute path to image i in the image sequence.
     """
-    return self.image_path_from_index(self._image_index[i])
+    ending = 'leftImg8bit'
+    if 'foggy' in self._image_set:
+      if (i % 3) == 0:
+        ending += '_foggy_beta_0.005'
+      elif (i % 3) == 1:
+        ending += '_foggy_beta_0.01'
+      elif (i % 3) == 2:
+        ending += '_foggy_beta_0.02'
+    return self.image_path_from_index(self._image_index[i]+ending)
 
   def image_path_from_index(self, index):
     """
     Construct an image path from the image's "index" identifier.
     """
-    loc = index[:index.find('_')]
+    loc = index[:index.find('_')]    
     image_path = os.path.join(self._data_path, 'leftImg8bit', self._image_set, loc,
-                              index + 'leftImg8bit' + self._image_ext)
+                              index + self._image_ext)
     assert os.path.exists(image_path), \
       'Path does not exist: {}'.format(image_path)
     return image_path
@@ -89,6 +104,8 @@ class cityscapes(imdb):
     for folder in os.listdir(image_set_file):
       imgs = os.listdir(image_set_file + '/' + folder)
       imgs = [img[:img.find('leftImg8bit')] for img in imgs]
+      if 'foggy' in self._image_set:
+        imgs = sorted(imgs)
       image_index.extend(imgs)
     # with open(image_set_file) as f:
     #   image_index = [x.strip() for x in f.readlines()]

@@ -42,22 +42,14 @@ case ${DATASET} in
   KITTI)
     TRAIN_IMDB="KITTI_train"
     TEST_IMDB="KITTI_val"
-    STEPSIZE="[350000]"
-    ITERS=490000
+    STEPSIZE="[50000]"
+    ITERS=70000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
     TRAIN_IMDB="cityscapes_train"
     TEST_IMDB="cityscapes_val"
-    STEPSIZE="[350000]"
-    ITERS=490000
-    ANCHORS="[4,8,16,32]"
-    RATIOS="[0.5,1,2]"
-    ;;
-  foggyCity)
-    TRAIN_IMDB="cityscapes_foggytrain"
-    TEST_IMDB="cityscapes_foggyval"
     STEPSIZE="[350000]"
     ITERS=490000
     ANCHORS="[4,8,16,32]"
@@ -83,7 +75,7 @@ set -x
 
 if [ ! -f ${NET_FINAL}.index ]; then
   if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
-    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net.py \
+    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_subIters.py \
       --weight data/imagenet_weights/${NET}.pth \
       --imdb ${TRAIN_IMDB} \
       --imdbval ${TEST_IMDB} \
@@ -94,7 +86,7 @@ if [ ! -f ${NET_FINAL}.index ]; then
       --set ANCHOR_SCALES ${ANCHORS} ANCHOR_RATIOS ${RATIOS} \
       TRAIN.STEPSIZE ${STEPSIZE} ${EXTRA_ARGS}
   else
-    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net.py \
+    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_subIters.py \
       --weight data/imagenet_weights/${NET}.pth \
       --imdb ${TRAIN_IMDB} \
       --imdbval ${TEST_IMDB} \

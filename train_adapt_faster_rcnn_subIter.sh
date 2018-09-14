@@ -17,7 +17,7 @@ EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 case ${DATASET} in
   KITTI)
     TRAIN_IMDB_S="KITTI_train"
-    TRAIN_IMDB_T="KITTI_fake"
+    TRAIN_IMDB_T="cityscapes_train"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
     ITERS=70000
@@ -53,7 +53,7 @@ set -x
 
 if [ ! -f ${NET_FINAL}.index ]; then
   if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
-    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
+    CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt_subIters.py \
       --weight output/vgg16/${TRAIN_IMDB_S}/default/vgg16_faster_rcnn_iter_490000.pth \
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \

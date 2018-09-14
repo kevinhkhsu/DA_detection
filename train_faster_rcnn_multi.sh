@@ -42,8 +42,8 @@ case ${DATASET} in
   KITTI)
     TRAIN_IMDB="KITTI_train"
     TEST_IMDB="KITTI_val"
-    STEPSIZE="[350000]"
-    ITERS=490000
+    STEPSIZE="[100000]"
+    ITERS=140000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
