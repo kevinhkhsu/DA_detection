@@ -939,6 +939,114 @@ class Network(nn.Module):
     # loss_D_const_S, loss_D_const_T = 0, 0
     return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T, \
            rpn_loss_cls_synth, rpn_loss_box_synth, loss_cls_synth, loss_box_synth, loss_synth, loss_D_img_synth, loss_D_img2_synth
+           
+  def train_adapt_step_img_inst(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
+    source_label = 0
+    target_label = 1
+
+    train_op.zero_grad()
+    D_inst_op.zero_grad()
+    D_img_op.zero_grad()
+    
+    # sig = nn.Sigmoid()
+    bceLoss_func = nn.BCEWithLogitsLoss()
+    # interp_S = nn.Upsample(size=(blobs_S['data'].shape[1], blobs_S['data'].shape[2]), mode='bilinear')
+    # interp_T = nn.Upsample(size=(blobs_T['data'].shape[1], blobs_T['data'].shape[2]), mode='bilinear')
+
+    #train with source
+    fc7, net_conv = self.forward(blobs_S['data'], blobs_S['im_info'], blobs_S['gt_boxes'])
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_S(net_conv)
+    #det loss
+    loss_S = self._losses['total_loss']
+    #D_inst
+    D_inst_out = self.D_inst(fc7)
+    #D_img
+    D_img_out = self.D_img(net_conv)
+
+    #loss
+    loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_S =  Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_S += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_S /= sig_D_inst_out.size()[0]
+    
+    total_loss_S = loss_S + (cfg.ADAPT_LAMBDA/2.) * (loss_D_inst_S + loss_D_img_S)#(loss_D_inst_S + loss_D_img_S + loss_D_const_S)
+    # total_loss_S.backward()
+
+    # print("S")
+    # print(loss_S.data[0], loss_D_inst_S.data[0], loss_D_img_S.data[0], loss_D_const_S.data[0], mean.data[0], source_label)
+
+    rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss = self._losses["rpn_cross_entropy"].data[0], \
+                                                                        self._losses['rpn_loss_box'].data[0], \
+                                                                        self._losses['cross_entropy'].data[0], \
+                                                                        self._losses['loss_box'].data[0], \
+                                                                        self._losses['total_loss'].data[0]
+    #train with target
+    fc7, net_conv = self.forward(blobs_T['data'], blobs_T['im_info'], blobs_T['gt_boxes'], adapt=True)
+    # fc7 = fc7.detach()
+    # net_conv = net_conv.detach()
+    # self.vgg.features[28].register_backward_hook(printgradnorm)
+    fc7 = grad_reverse(fc7)
+    net_conv = grad_reverse(net_conv)
+
+    # net_conv = interp_T(net_conv)
+
+    #D_inst
+    D_inst_out = self.D_inst(fc7)
+    # D_img
+    D_img_out = self.D_img(net_conv)
+    #self.D_img.conv3.register_backward_hook(printgradnorm)
+    #loss
+    loss_D_inst_T = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(target_label)).cuda()) 
+    loss_D_img_T = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(target_label)).cuda())
+
+    # sig_D_inst_out = sig(D_inst_out)
+    # sig_D_img_out = sig(D_img_out)
+    # mean = sig_D_img_out.mean()
+
+    # loss_D_const_T = Variable(torch.FloatTensor(1).zero_()).cuda()
+    # for j in range(sig_D_inst_out.size()[0]):
+    #   loss_D_const_T += torch.dist(mean, sig_D_inst_out[j][0])
+    # loss_D_const_T /= sig_D_inst_out.size()[0]
+
+    total_loss_T = (cfg.ADAPT_LAMBDA/2.) * (loss_D_inst_T + loss_D_img_T)#(loss_D_inst_T + loss_D_img_T + loss_D_const_T)
+    #total_loss_T.backward()
+
+    total_loss = total_loss_S + total_loss_T
+    total_loss.backward()
+    
+    #clip gradient
+    # clip = 100
+    # torch.nn.utils.clip_grad_norm(self.D_inst.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.D_img.parameters(),clip)
+    # torch.nn.utils.clip_grad_norm(self.parameters(),clip)
+
+    # print("T")
+    # print(loss_D_inst_T.data[0], loss_D_img_T.data[0], loss_D_const_T.data[0], mean.data[0], target_label)
+
+
+    train_op.step()
+    D_inst_op.step()
+    D_img_op.step()
+                                                                        
+    self.delete_intermediate_states()
+
+    # loss_D_inst_S, loss_D_const_S, loss_D_inst_T, loss_D_const_T = 0, 0, 0, 0
+    # loss_D_img_S, loss_D_const_S, loss_D_img_T, loss_D_const_T = 0, 0, 0, 0
+
+    loss_D_const_S, loss_D_const_T = 0, 0
+    return rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, loss, loss_D_inst_S, loss_D_img_S, loss_D_const_S, loss_D_inst_T, loss_D_img_T, loss_D_const_T
 
   def train_adapt_step_img_inst_const(self, blobs_S, blobs_T, train_op, D_inst_op, D_img_op):
     source_label = 0

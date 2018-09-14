@@ -276,8 +276,8 @@ class SolverWrapper(object):
         self.snapshot(iter)
         lr *= cfg.TRAIN.GAMMA
         scale_lr(self.optimizer, cfg.TRAIN.GAMMA)
-        # scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
-        # scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
+        #scale_lr(self.D_inst_op, cfg.TRAIN.GAMMA)
+        #scale_lr(self.D_img_op, cfg.TRAIN.GAMMA)
         next_stepsize = stepsizes.pop()
 
       utils.timer.timer.tic()
@@ -300,6 +300,10 @@ class SolverWrapper(object):
       else:
         # Compute the graph without summary
         #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #  self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
           self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)

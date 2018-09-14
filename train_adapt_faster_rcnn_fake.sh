@@ -20,17 +20,17 @@ case ${DATASET} in
     TRAIN_IMDB_T="cityscapes_train"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
-    ITERS=70000
+    ITERS=20000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
-    TRAIN_IMDB_S="cityscapes_train"
+    TRAIN_IMDB_S="cityscapes_faketrain"
     TRAIN_IMDB_T="KITTI_train"
     TEST_IMDB="KITTI_val"
     STEPSIZE="[50000]"
     ITERS=70000
-    ANCHORS="[8,16,32]"
+    ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   *)

@@ -232,19 +232,21 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   if vis and 'cityscapes' in imdb.name:
     gt_roidb = [imdb._load_cityscapes_annotation(index)
                   for index in imdb.image_index]
+    annot_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl'
   elif vis and 'KITTI' in imdb.name:
     gt_roidb = [imdb._load_kitti_annotation(index)
               for index in imdb.image_index]
+    annot_path = '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
   else:
     gt_roidb = None
 
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
-  if not os.path.isdir('/home/hhsu22/pytorch-faster-rcnn/vis/xx/'):
-    os.makedirs('/home/hhsu22/pytorch-faster-rcnn/vis/xx/')
+  if not os.path.isdir('/home/disk/DA/pytorch-faster-rcnn/vis/xx/'):
+    os.makedirs('/home/disk/DA/pytorch-faster-rcnn/vis/xx/')
 
-  annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
+  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
   with open(annots_path, 'rb') as f:
     try:
       recs = pickle.load(f)
