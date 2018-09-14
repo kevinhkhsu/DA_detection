@@ -125,7 +125,9 @@ class SolverWrapper(object):
 
   def construct_graph(self):
     # Set the random seed
+    torch.backends.cudnn.deterministic = True
     torch.manual_seed(cfg.RNG_SEED)
+    torch.cuda.manual_seed_all(cfg.RNG_SEED)
     # Build the main computation graph
     self.net.create_architecture(self.imdb.num_classes, tag='default',
                                             anchor_scales=cfg.ANCHOR_SCALES,
@@ -267,7 +269,7 @@ class SolverWrapper(object):
 
     self.net.D_inst.train()
     self.net.D_inst.cuda()
-
+    
     while iter < max_iters + 1:
       # Learning rate
       if iter == next_stepsize + 1:

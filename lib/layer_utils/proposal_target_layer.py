@@ -106,6 +106,7 @@ def _sample_rois(all_rois, all_scores, gt_boxes, fg_rois_per_image, rois_per_ima
   """Generate a random sample of RoIs comprising foreground and background
   examples.
   """
+  npr.seed(cfg.RNG_SEED)
   # overlaps: (rois x gt_boxes)
   overlaps = bbox_overlaps(
     all_rois[:, 1:5].data,

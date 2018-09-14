@@ -521,9 +521,9 @@ class Network(nn.Module):
       """
       # x is a parameter
       if truncated:
-        m.weight.data.normal_().fmod_(2).mul_(stddev).add_(mean) # not a perfect approximation
+        m.weight.data.normal_(generator=torch.manual_seed(cfg.RNG_SEED)).fmod_(2).mul_(stddev).add_(mean) # not a perfect approximation
       else:
-        m.weight.data.normal_(mean, stddev)
+        m.weight.data.normal_(mean, stddev, generator=torch.manual_seed(cfg.RNG_SEED))
       m.bias.data.zero_()
       
     normal_init(self.rpn_net, 0, 0.01, cfg.TRAIN.TRUNCATED)

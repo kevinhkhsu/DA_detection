@@ -19,6 +19,7 @@ def proposal_top_layer(rpn_cls_prob, rpn_bbox_pred, im_info, _feat_stride, ancho
      without using non-maximal suppression,
      For details please see the technical report
   """
+  npr.seed(cfg.RNG_SEED)
   rpn_top_n = cfg.TEST.RPN_TOP_N
 
   scores = rpn_cls_prob[:, :, :, num_anchors:]

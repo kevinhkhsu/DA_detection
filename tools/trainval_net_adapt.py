@@ -21,6 +21,7 @@ from nets.vgg16 import vgg16
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
 
+import random
 #import os
 #os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -106,11 +107,12 @@ if __name__ == '__main__':
   pprint.pprint(cfg)
 
   np.random.seed(cfg.RNG_SEED)
-
+  random.seed(cfg.RNG_SEED)
   # train set
   imdb, roidb = combined_roidb(args.imdb_name)
   print('{:d} roidb entries'.format(len(roidb)))
   imdb_T, roidb_T = combined_roidb(args.imdb_T_name)
+  print('{:d} roidbT entries'.format(len(roidb_T)))
 
   # output directory where the models are saved
   output_dir = get_output_dir(imdb, args.tag)

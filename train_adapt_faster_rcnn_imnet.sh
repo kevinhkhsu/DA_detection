@@ -16,11 +16,11 @@ EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 
 case ${DATASET} in
   KITTI)
-    TRAIN_IMDB_S="KITTI_train"
+    TRAIN_IMDB_S="KITTI_train+KITTI_val"
     TRAIN_IMDB_T="cityscapes_train"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
-    ITERS=490000
+    ITERS=70000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;

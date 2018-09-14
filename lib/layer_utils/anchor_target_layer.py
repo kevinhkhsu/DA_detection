@@ -18,6 +18,7 @@ import torch
 
 def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anchors, num_anchors):
   """Same as the anchor target layer in original Fast/er RCNN """
+  npr.seed(cfg.RNG_SEED)
   A = num_anchors
   total_anchors = all_anchors.shape[0]
   K = total_anchors / num_anchors
