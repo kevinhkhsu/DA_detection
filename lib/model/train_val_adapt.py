@@ -151,6 +151,12 @@ class SolverWrapper(object):
 
     self.D_inst_op = torch.optim.SGD(self.net.D_inst.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
     self.D_img_op = torch.optim.SGD(self.net.D_img.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+    if cfg.FPN:
+      self.D_img_op1 = torch.optim.SGD(self.net.D_img1.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+      self.D_img_op2 = torch.optim.SGD(self.net.D_img2.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+      self.D_img_op3 = torch.optim.SGD(self.net.D_img3.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+      self.D_img_op4 = torch.optim.SGD(self.net.D_img4.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
+
     # self.D_img_branch_op = torch.optim.SGD(self.net.D_img_domain.parameters(), lr=lr, momentum=cfg.TRAIN.MOMENTUM)
 
     # self.D_inst_op = optim.Adam(self.net.D_inst.parameters(), lr=lr/2., betas=(0.9, 0.99))
@@ -305,12 +311,16 @@ class SolverWrapper(object):
         #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #   self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #  self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #   self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+          self.net.FPN_train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #  self.net.FPN_train_adapt_step_img_x5(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, self.D_img_op1, self.D_img_op2, self.D_img_op3, self.D_img_op4)
+        #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+        #  self.net.train_adapt_step_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #   self.net.train_focus_inst_adapt_step(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)  
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T, D_inst_loss_adv_T, D_img_loss_adv_T, D_const_loss_adv_T= \

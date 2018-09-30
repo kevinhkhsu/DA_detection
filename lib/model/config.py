@@ -22,13 +22,13 @@ __C.TRAIN = edict()
 __C.ADAPT_LAMBDA = 1e-1
 
 # Initial learning rate
-__C.TRAIN.LEARNING_RATE = 0.001
+__C.TRAIN.LEARNING_RATE = 0.0005#0.001
 
 # Momentum
 __C.TRAIN.MOMENTUM = 0.9
 
 # Weight decay, for regularization
-__C.TRAIN.WEIGHT_DECAY = 0.0005 #0.0001
+__C.TRAIN.WEIGHT_DECAY = 0.0001
 
 # Factor for reducing the learning rate
 __C.TRAIN.GAMMA = 0.1
@@ -96,7 +96,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 10000
+__C.TRAIN.SNAPSHOT_ITERS = 1000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
@@ -209,6 +209,12 @@ __C.TEST.MODE = 'nms'
 
 # Only useful when TEST.MODE is 'top', specifies the number of top proposals to select
 __C.TEST.RPN_TOP_N = 5000
+
+#
+#FPN
+#
+
+__C.FPN = False
 
 #
 # ResNet options

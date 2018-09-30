@@ -138,6 +138,8 @@ if __name__ == '__main__':
     net = resnetv1(num_layers=152)
   elif args.net == 'mobile':
     net = mobilenetv1()
+  elif args.net == 'FPNres50':
+    net = resnetv1(num_layers=50)
   else:
     raise NotImplementedError
     

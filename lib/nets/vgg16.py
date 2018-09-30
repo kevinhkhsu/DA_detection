@@ -31,8 +31,8 @@ class vgg16(Network):
     self.vgg.classifier = nn.Sequential(*list(self.vgg.classifier._modules.values())[:-1])
 
     # Fix the layers before conv3:
-    for layer in range(10):
-      for p in self.vgg.features[layer].parameters(): p.requires_grad = False
+    #for layer in range(10):
+    #  for p in self.vgg.features[layer].parameters(): p.requires_grad = False
 
     # not using the last maxpool layer
     self._layers['head'] = nn.Sequential(*list(self.vgg.features._modules.values())[:-1])
