@@ -9,3 +9,4 @@ lib/pycocotools/_mask.so
 .idea
 vis/
 results/
+pr/*
