@@ -7,6 +7,8 @@ lib/pycocotools
 lib/pycocotools/_mask.c
 lib/pycocotools/_mask.so
 .idea
-vis/
-results/
+vis/*
+results/*
 pr/*
+*.png
+

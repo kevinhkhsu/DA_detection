@@ -37,7 +37,7 @@ class RoIDataLayer(object):
     if self._random:
       st0 = np.random.get_state()
       millis = int(round(time.time() * 1000)) % 4294967295
-      np.random.seed(millis)
+      #np.random.seed(millis)
     
     if cfg.TRAIN.ASPECT_GROUPING:
       widths = np.array([r['width'] for r in self._roidb])
@@ -56,8 +56,8 @@ class RoIDataLayer(object):
     else:
       self._perm = np.random.permutation(np.arange(len(self._roidb)))
     # Restore the random state
-    if self._random:
-      np.random.set_state(st0)
+    #if self._random:
+      #np.random.set_state(st0)
       
     self._cur = 0
 

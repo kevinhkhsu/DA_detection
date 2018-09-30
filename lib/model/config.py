@@ -96,7 +96,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 1000
+__C.TRAIN.SNAPSHOT_ITERS = 5000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
@@ -268,7 +268,7 @@ __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 #__C.ROOT_DIR = '/media/kevin/Seagate\ Expansion\ Drive/_adapt/'
 # Data directory
 #__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = osp.abspath('/home/hhsu22/')
+__C.DATA_DIR = osp.abspath('/home/kevin/Downloads/')
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'

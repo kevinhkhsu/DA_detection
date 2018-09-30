@@ -246,8 +246,8 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
-  if not os.path.isdir('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/'):
-    os.makedirs('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/')
+  #if not os.path.isdir('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/'):
+  #  os.makedirs('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/')
   print(imdb.name)
   #annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
   print(annots_path, imdb.name)
@@ -257,6 +257,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   #  except:
   #    recs = pickle.load(f, encoding='bytes')
   #print(recs.keys())
+
   # extract gt objects for this class
   class_recs = {}
   npos = 0
