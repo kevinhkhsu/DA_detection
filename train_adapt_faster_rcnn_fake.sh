@@ -54,11 +54,7 @@ set -x
 if [ ! -f ${NET_FINAL}.index ]; then
   if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-<<<<<<< HEAD
       --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_K2snythC_iter_6000.pth \
-=======
-      --weight output/vgg16/KITTI_train+KITTI_val/_adapt/vgg16_faster_rcnn_img_K2synthC_allSource_allTarget_iter_70000.pth \
->>>>>>> 5abcb18699f6ff5abcfc97e1c54c4f10103e76c8
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \
@@ -70,11 +66,7 @@ if [ ! -f ${NET_FINAL}.index ]; then
       TRAIN.STEPSIZE ${STEPSIZE} ${EXTRA_ARGS}
   else
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-<<<<<<< HEAD
       --weight output/${NET}/KITTI_train+KITTI_val/_adapt/${NET}_faster_rcnn_img_K2snythC_iter_6000.pth \
-=======
-      --weight output/vgg16/KITTI_train+KITTI_val/_adapt/vgg16_faster_rcnn_img_K2synthC_allSource_allTarget_iter_70000.pth \
->>>>>>> 5abcb18699f6ff5abcfc97e1c54c4f10103e76c8
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \
