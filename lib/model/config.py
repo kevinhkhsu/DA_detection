@@ -22,13 +22,13 @@ __C.TRAIN = edict()
 __C.ADAPT_LAMBDA = 1e-1
 
 # Initial learning rate
-__C.TRAIN.LEARNING_RATE = 0.0005#0.001
+__C.TRAIN.LEARNING_RATE = 0.001
 
 # Momentum
 __C.TRAIN.MOMENTUM = 0.9
 
 # Weight decay, for regularization
-__C.TRAIN.WEIGHT_DECAY = 0.0001
+__C.TRAIN.WEIGHT_DECAY = 0.0005 #0.0001
 
 # Factor for reducing the learning rate
 __C.TRAIN.GAMMA = 0.1
@@ -56,7 +56,7 @@ __C.TRAIN.USE_GT = False
 __C.TRAIN.ASPECT_GROUPING = False
 
 # The number of snapshots kept, older ones are deleted to save space
-__C.TRAIN.SNAPSHOT_KEPT = 70
+__C.TRAIN.SNAPSHOT_KEPT = 20
 
 # The time interval for saving tensorflow summaries
 __C.TRAIN.SUMMARY_INTERVAL = 180
@@ -268,7 +268,7 @@ __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 #__C.ROOT_DIR = '/media/kevin/Seagate\ Expansion\ Drive/_adapt/'
 # Data directory
 #__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = osp.abspath('/home/kevin/Downloads/')
+__C.DATA_DIR = osp.abspath('/home/hhsu22/')
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'

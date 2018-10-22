@@ -18,7 +18,6 @@ import time, os, sys
 from nets.vgg16 import vgg16
 from nets.resnet_v1 import resnetv1
 from nets.mobilenet_v1 import mobilenetv1
-from nets.FPN_resnet_v1 import FPNresnetv1
 
 import torch
 
@@ -97,7 +96,7 @@ if __name__ == '__main__':
   elif args.net == 'mobile':
     net = mobilenetv1()
   elif args.net == 'FPNres50':
-    net = FPNresnetv1(num_layers=50)
+    net = resnetv1(num_layers=50)
   else:
     raise NotImplementedError
 

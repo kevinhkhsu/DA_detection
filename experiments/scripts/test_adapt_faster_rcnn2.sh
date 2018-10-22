@@ -39,7 +39,7 @@ case ${DATASET} in
     ;;
 esac
 
-LOG="experiments/logs/test_${NET}_${TRAIN_IMDB_S}_adapt_$(TEST_IMDB)_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
+LOG="experiments/logs/test_${NET}_${TRAIN_IMDB_S}_adapt_${TEST_IMDB}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 

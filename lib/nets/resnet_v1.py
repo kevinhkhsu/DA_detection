@@ -367,8 +367,8 @@ class resnetv1(Network):
       self.resnet.apply(set_bn_eval)
 
   def load_pretrained_cnn(self, state_dict):
-    netDict = self.state_dict()
-    stateDict = {k: v for k, v in state_dict.items() if k in netDict}
-    netDict.update(stateDict)
-    nn.Module.load_state_dict(self, netDict)
-    #self.resnet.load_state_dict({k: state_dict[k] for k in list(self.resnet.state_dict())})
+    #netDict = self.state_dict()
+    #stateDict = {k: v for k, v in state_dict.items() if k in netDict}
+    #netDict.update(stateDict)
+    #nn.Module.load_state_dict(self, netDict)
+    self.resnet.load_state_dict({k: state_dict[k] for k in list(self.resnet.state_dict())})

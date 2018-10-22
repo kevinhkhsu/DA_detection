@@ -44,7 +44,7 @@ case ${DATASET} in
     TEST_IMDB="KITTI_val"
     STEPSIZE="[]"
     ITERS=10000
-    ANCHORS="[4,8,16,32,64]"
+    ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
@@ -58,6 +58,14 @@ case ${DATASET} in
   foggyCity)
     TRAIN_IMDB="cityscapes_foggytrain"
     TEST_IMDB="cityscapes_foggyval"
+    STEPSIZE="[350000]"
+    ITERS=490000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
+  bdd100k)
+    TRAIN_IMDB='bdd100k_daytrain'
+    TEST_IMDB='bdd100k_dayval'
     STEPSIZE="[350000]"
     ITERS=490000
     ANCHORS="[4,8,16,32]"

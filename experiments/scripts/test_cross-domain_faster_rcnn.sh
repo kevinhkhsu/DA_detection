@@ -8,26 +8,27 @@ export PYTHONUNBUFFERED="True"
 GPU_ID=$1
 DATASET=$2
 NET=$3
+TEST_ITER=$4
 
 array=( $@ )
 len=${#array[@]}
-EXTRA_ARGS=${array[@]:3:$len}
+EXTRA_ARGS=${array[@]:4:$len}
 EXTRA_ARGS_SLUG=${EXTRA_ARGS// /_}
 
 case ${DATASET} in
   KITTI)
-    TRAIN_IMDB="KITTI_train"
+    TRAIN_IMDB="KITTI_train+KITTI_val"
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[350000]"
-    ITERS=6000
+    ITERS=${TEST_ITER}
     ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
     TRAIN_IMDB="cityscapes_train"
-    TEST_IMDB="cityscapes_val"
+    TEST_IMDB="cityscapes_foggyval"
     STEPSIZE="[350000]"
-    ITERS=70000
+    ITERS=${TEST_ITER}
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
@@ -46,7 +47,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_multi_lr_0.002_110k_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_imnet_new_iter_${ITERS}.pth
 fi
 set -x
 

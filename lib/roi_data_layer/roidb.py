@@ -13,6 +13,7 @@ from __future__ import print_function
 import numpy as np
 from model.config import cfg
 import PIL
+from tqdm import tqdm
 
 def prepare_roidb(imdb):
   """Enrich the imdb's roidb by adding some derived quantities that
@@ -23,9 +24,14 @@ def prepare_roidb(imdb):
   """
   roidb = imdb.roidb
   if not (imdb.name.startswith('coco')):
-    sizes = [PIL.Image.open(imdb.image_path_at(i)).size
-         for i in range(imdb.num_images)]
-  for i in range(len(imdb.image_index)):
+    if 'bdd' in imdb.name:
+      sizes = [(1280,720) for i in range(imdb.num_images)]
+    else:
+      sizes = [PIL.Image.open(imdb.image_path_at(i)).size
+               for i in range(imdb.num_images)]
+
+  # for i in range(len(imdb.image_index)):
+  for i in tqdm(range(len(imdb.image_index))):
     roidb[i]['image'] = imdb.image_path_at(i)
     if not (imdb.name.startswith('coco')):
       roidb[i]['width'] = sizes[i][0]
