@@ -117,4 +117,4 @@ if __name__ == '__main__':
     print('Loaded.')
 
   test_net(net, imdb, filename, max_per_image=args.max_per_image)
-  os.system("mv ./pr/pr.png ./pr/%s.png" % args.model[args.model.rfind('/')+1:][18:-4])
+  # os.system("mv ./pr/pr.png ./pr/%s.png" % args.model[args.model.rfind('/')+1:][18:-4])

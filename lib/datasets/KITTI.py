@@ -95,24 +95,24 @@ class KITTI(imdb):
       'Path does not exist: {}'.format(image_set_file)
 
     ####Threshold score from cycle gan
-    ll = 7481
+    #ll = 7481
 
-    if self._image_set == 'fake':
-      w = np.array(self.cycle_gan_score.values())
-      k = np.array(self.cycle_gan_score.keys())
-      thres = 0.7 #>0.6: 7405, >0.65: 7297, >0.7: 6997, >0.8: 5973, >0.9:3947
-      ll = 6997
-      keep = np.nonzero(w>thres)[0]
-      assert(keep.size == ll)
-      k = k[keep]
+    #if self._image_set == 'fake':
+    #  w = np.array(self.cycle_gan_score.values())
+    #  k = np.array(self.cycle_gan_score.keys())
+    #  thres = 0.7 #>0.6: 7405, >0.65: 7297, >0.7: 6997, >0.8: 5973, >0.9:3947
+    #  ll = 6997
+    #  keep = np.nonzero(w>thres)[0]
+    #  assert(keep.size == ll)
+    #  k = k[keep]
 
-      with open(image_set_file) as f:
-        image_index = [x.strip() for x in f.readlines() if x.strip() in k]
-      print(len(image_index))
+    #  with open(image_set_file) as f:
+    #    image_index = [x.strip() for x in f.readlines() if x.strip() in k]
+    #  print(len(image_index))
 
-    else:
-      with open(image_set_file) as f:
-        image_index = [x.strip() for x in f.readlines()]
+    #else:
+    with open(image_set_file) as f:
+      image_index = [x.strip() for x in f.readlines()]
     
     return image_index
 

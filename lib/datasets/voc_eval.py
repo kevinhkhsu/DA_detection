@@ -74,10 +74,11 @@ def parse_rec_KITTI(filename):
     objects.append(obj_struct)
   return objects
 
-def pare_rec_bdd(labels):
+def parse_rec_bdd(labels):
   """ Parse bdd100k"""
   objects = []
   for ll in labels:
+    obj_struct = {}
     clsName = ll['category']
     if clsName in ['drivable area', 'lane']:
       continue
@@ -168,32 +169,38 @@ def voc_eval(detpath,
   # assumes imagesetfile is a text file with each line an image name
   # cachedir caches the annotations in a pickle file
 
+  if 'train' in imagesetfile:
+    mode = 'train'
+  if 'val' in imagesetfile:
+    mode = 'val'
+
   # first load gt
   if not os.path.isdir(cachedir):
     os.mkdir(cachedir)
-  cachefile = os.path.join(cachedir, '%s_annots.pkl' % 'val')
+  cachefile = os.path.join(cachedir, '%s_annots.pkl' % os.path.basename(imagesetfile))
   # read list of images
   with open(imagesetfile, 'r') as f:
     lines = f.readlines()
   imagenames = [x.strip() for x in lines]
 
-  if 'train' in imagesetfile:
-    mode = 'train'
-  if 'val' in imagesetfile:
-    mode = 'val'
+
 
   if not os.path.isfile(cachefile) and 'bdd' in annopath:
     #load bdd annotations
     recs = {}
     with open(annopath, 'r') as f:
       annots = json.load(f)
-    for i, ann in enumerage(annots):
-      imagename = ann['name']
-      if (mode+'/'+imagename) in imagenames:
+    cc = 0
+    for i, ann in enumerate(annots):
+      imagename = mode+'/'+ann['name']
+      if imagename in imagenames:
+        cc += 1
         recs[imagename] = parse_rec_bdd(ann['labels'])
         if i % 100 == 0:
           print('Reading annotation for {:d}/{:d}'.format(
-            i + 1, len(imagenames)))
+            cc , len(imagenames)))
+    print('Reading annotation for {:d}/{:d}'.format(
+            cc , len(imagenames)))
     # save
     print('Saving cached annotations to {:s}'.format(cachefile))
     with open(cachefile, 'wb') as f:
@@ -303,5 +310,5 @@ def voc_eval(detpath,
   # ground truth
   prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
   ap = voc_ap(rec, prec, use_07_metric)
-  print(tp_ALL, float(nd))
+  # print(tp_ALL, float(nd))
   return rec, prec, ap, tp_ALL/float(nd)

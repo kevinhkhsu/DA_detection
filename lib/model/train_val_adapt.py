@@ -314,11 +314,11 @@ class SolverWrapper(object):
         #  self.net.train_adapt_step_img_inst_const(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         # rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #   self.net.train_adapt_step_img_inst(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-          self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
-        #synth_weight = self.imdb.cycle_gan_score[os.path.basename(blobs['data_path'][0])[:-4]]
         #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
-        #  self.net.train_adapt_step_img_weighted(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, synth_weight)
+        #  self.net.train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
+        synth_weight = self.imdb.cycle_gan_score[os.path.basename(blobs['data_path'][0])[:-4]]
+        rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
+          self.net.train_adapt_step_img_weighted(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op, synth_weight)
         #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
         #  self.net.FPN_train_adapt_step_img(blobs, blobsT, self.optimizer, self.D_inst_op, self.D_img_op)
         #rpn_loss_cls, rpn_loss_box, loss_cls, loss_box, total_loss, D_inst_loss_S, D_img_loss_S, D_const_loss_S, D_inst_loss_T, D_img_loss_T, D_const_loss_T = \
