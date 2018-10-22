@@ -129,15 +129,15 @@ class resnetv1(Network):
       raise NotImplementedError
 
     # Fix blocks 
-    #for p in self.resnet.bn1.parameters(): p.requires_grad=False
-    #for p in self.resnet.conv1.parameters(): p.requires_grad=False
+    for p in self.resnet.bn1.parameters(): p.requires_grad=False
+    for p in self.resnet.conv1.parameters(): p.requires_grad=False
     assert (0 <= cfg.RESNET.FIXED_BLOCKS < 4)
-    #if cfg.RESNET.FIXED_BLOCKS >= 3:
-    #  for p in self.resnet.layer3.parameters(): p.requires_grad=False
-    #if cfg.RESNET.FIXED_BLOCKS >= 2:
-    #  for p in self.resnet.layer2.parameters(): p.requires_grad=False
-    #if cfg.RESNET.FIXED_BLOCKS >= 1:
-    #  for p in self.resnet.layer1.parameters(): p.requires_grad=False
+    if cfg.RESNET.FIXED_BLOCKS >= 3:
+      for p in self.resnet.layer3.parameters(): p.requires_grad=False
+    if cfg.RESNET.FIXED_BLOCKS >= 2:
+      for p in self.resnet.layer2.parameters(): p.requires_grad=False
+    if cfg.RESNET.FIXED_BLOCKS >= 1:
+      for p in self.resnet.layer1.parameters(): p.requires_grad=False
 
     def set_bn_fix(m):
       classname = m.__class__.__name__
@@ -155,7 +155,7 @@ class resnetv1(Network):
     nn.Module.train(self, mode)
     if mode:
       # Set fixed blocks to be in eval mode (not really doing anything)
-      #self.resnet.eval()
+      self.resnet.eval()
       if cfg.RESNET.FIXED_BLOCKS <= 3:
         self.resnet.layer4.train()
       if cfg.RESNET.FIXED_BLOCKS <= 2:

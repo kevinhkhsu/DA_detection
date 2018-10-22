@@ -258,11 +258,15 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   #    recs = pickle.load(f, encoding='bytes')
   #print(recs.keys())
 
+  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
+  
   # extract gt objects for this class
   class_recs = {}
   npos = 0
   #for imagename in imdb._image_index:
-  #  R = [obj for obj in recs[imagename] if obj['name'] == 'car']
+
+  #  R = [obj for obj in recs[imagename[:imagename.find('leftImg8bit')]] if obj['name'] == 'car']
+
   #  bbox = np.array([x['bbox'] for x in R])
   #  difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
   #  det = [False] * len(R)

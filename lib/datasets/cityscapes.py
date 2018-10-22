@@ -45,7 +45,7 @@ class cityscapes(imdb):
                      #'train',
                      #'motorcycle',
                      #'bicycle'
-                     )
+                      )
     print('Num Classes:', len(self._classes))
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
     self._image_ext = '.png'

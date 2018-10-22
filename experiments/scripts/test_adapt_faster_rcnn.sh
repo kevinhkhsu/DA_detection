@@ -22,7 +22,7 @@ case ${DATASET} in
     TEST_IMDB="cityscapes_val"
     STEPSIZE="[50000]"
     ITERS=${TEST_ITER}
-    ANCHORS="[4,8,16,32]"
+    ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
