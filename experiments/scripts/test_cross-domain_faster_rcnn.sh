@@ -26,10 +26,10 @@ case ${DATASET} in
     ;;
   cityscapes)
     TRAIN_IMDB="cityscapes_train"
-    TEST_IMDB="cityscapes_foggyval"
+    TEST_IMDB="KITTI_val"
     STEPSIZE="[350000]"
     ITERS=${TEST_ITER}
-    ANCHORS="[4,8,16,32]"
+    ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
   bdd100k)

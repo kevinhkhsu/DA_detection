@@ -64,8 +64,8 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   bdd100k)
-    TRAIN_IMDB='bdd100k_daytrain'
-    TEST_IMDB='bdd100k_dayval'
+    TRAIN_IMDB='bdd100k_cleardaytrain'
+    TEST_IMDB='bdd100k_cleardayval'
     STEPSIZE="[350000]"
     ITERS=490000
     ANCHORS="[4,8,16,32]"

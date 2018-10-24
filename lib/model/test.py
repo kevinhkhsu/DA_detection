@@ -243,6 +243,7 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
   # else:
   #   gt_roidb = None
   #   annots_path = None
+
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 

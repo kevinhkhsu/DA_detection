@@ -56,7 +56,7 @@ __C.TRAIN.USE_GT = False
 __C.TRAIN.ASPECT_GROUPING = False
 
 # The number of snapshots kept, older ones are deleted to save space
-__C.TRAIN.SNAPSHOT_KEPT = 20
+__C.TRAIN.SNAPSHOT_KEPT = 10
 
 # The time interval for saving tensorflow summaries
 __C.TRAIN.SUMMARY_INTERVAL = 180
@@ -268,7 +268,7 @@ __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 #__C.ROOT_DIR = '/media/kevin/Seagate\ Expansion\ Drive/_adapt/'
 # Data directory
 #__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = osp.abspath('/home/hhsu22/')
+__C.DATA_DIR = osp.abspath('/home/kevin/Downloads')
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'
