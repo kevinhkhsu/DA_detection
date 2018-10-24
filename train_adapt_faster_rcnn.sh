@@ -33,6 +33,15 @@ case ${DATASET} in
     ANCHORS="[4,8,16,32,64]"
     RATIOS="[0.5,1,2]"
     ;;
+  bdd100k)
+    TRAIN_IMDB_S="bdd100k_daytrain+bdd100k_dayval"
+    TRAIN_IMDB_T="bdd100k_daySynthNighttrain+bdd100k_daySynthNightval"
+    TEST_IMDB="bdd100k_nightval"
+    STEPSIZE="[35000]"
+    ITERS=70000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
   *)
     echo "No dataset given"
     exit
@@ -66,7 +75,7 @@ if [ ! -f ${NET_FINAL}.index ]; then
       TRAIN.STEPSIZE ${STEPSIZE} ${EXTRA_ARGS}
   else
     CUDA_VISIBLE_DEVICES=${GPU_ID} time python ./tools/trainval_net_adapt.py \
-      --weight output/${NET}/KITTI_train/default/${NET}_faster_rcnn_iter_490000.pth \
+      --weight output/${NET}/bdd100k_daytrain/default/${NET}_faster_rcnn_day_iter_490000.pth \
       --imdb ${TRAIN_IMDB_S} \
       --imdbval ${TEST_IMDB} \
       --imdb_T ${TRAIN_IMDB_T} \

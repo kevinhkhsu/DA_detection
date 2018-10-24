@@ -64,7 +64,7 @@ case ${DATASET} in
     TRAIN_IMDB="bdd100k_daytrain"
     TEST_IMDB="bdd100k_dayval"
     STEPSIZE="[350000]"
-    ITERS=180000
+    ITERS=490000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;

@@ -1979,7 +1979,7 @@ class Network(nn.Module):
 
     #loss
     # loss_D_inst_S = bceLoss_func(D_inst_out, Variable(torch.FloatTensor(D_inst_out.data.size()).fill_(source_label)).cuda()) 
-    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda()) * synth_weight
+    loss_D_img_S = bceLoss_func(D_img_out, Variable(torch.FloatTensor(D_img_out.data.size()).fill_(source_label)).cuda()) #* synth_weight
 
     # sig_D_inst_out = sig(D_inst_out)
     # sig_D_img_out = sig(D_img_out)

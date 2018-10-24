@@ -84,6 +84,8 @@ class bdd100k(imdb):
     """
 
     if 'synth' in self._image_set.lower():
+      self._image_set = self._image_set.replace('train', '')
+      self._image_set = self._image_set.replace('val', '')
       image_path = os.path.join(self._devkit_path, self._image_set+'_images',
                               index + self._image_ext)
     else:

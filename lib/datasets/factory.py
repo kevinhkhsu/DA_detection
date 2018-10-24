@@ -54,7 +54,7 @@ for split in ['train', 'val', 'faketrain', 'fakeval', 'foggytrain', 'foggyval', 
 
 # Set up bdd100k
 for split in ['train', 'val', 'daytrain', 'dayval', 'nighttrain', 'nightval', 'citydaytrain', 'citydayval', 'cleardaytrain', 'cleardayval', 'rainydaytrain', 'rainydayval', \
-              'citydaySynthCityscapes', 'daySynthNight', 'cleardaySynthRainyday']:
+              'citydaySynthCityscapestrain', 'citydaySynthCityscapesval', 'daySynthNighttrain', 'daySynthNightval', 'cleardaySynthRainydaytrain', 'cleardaySynthRainydayval']:
   name = 'bdd100k_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: bdd100k(split))
 
