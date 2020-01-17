@@ -94,8 +94,6 @@ def im_detect(net, im):
 
   _, scores, bbox_pred, rois, fc7, net_conv = net.test_image(blobs['data'], blobs['im_info'])
 
-  # cv2.imwrite('./orig.png' ,im)
-
   boxes = rois[:, 1:5] / im_scales[0]
   scores = np.reshape(scores, [scores.shape[0], -1])
   bbox_pred = np.reshape(bbox_pred, [bbox_pred.shape[0], -1])
@@ -229,61 +227,15 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
 
   output_dir = get_output_dir(imdb, weights_filename)
 
-  # if vis and 'cityscapes' in imdb.name:
-  #   gt_roidb = [imdb._load_cityscapes_annotation(index)
-  #                 for index in imdb.image_index]
-  #   if 'foggy' in imdb.name:
-  #     annots_path = '%s/CityScapes/annotations_cache/cityscapes_foggy_annots.pkl' % cfg.DATA_DIR
-  #   else:
-  #     annots_path = '%s/CityScapes/annotations_cache/cityscapes_annots.pkl' % cfg.DATA_DIR
-  # elif vis and 'KITTI' in imdb.name:
-  #   gt_roidb = [imdb._load_kitti_annotation(index)
-  #             for index in imdb.image_index]
-  #   annots_path = '%s/KITTI/annotations_cache/val_annots.pkl' % cfg.DATA_DIR
-  # else:
-  #   gt_roidb = None
-  #   annots_path = None
-
   # timers
   _t = {'im_detect' : Timer(), 'misc' : Timer()}
 
-  #if not os.path.isdir('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/'):
-  #  os.makedirs('/home/hhsu22/DA/pytorch-faster-rcnn/vis/xx/')
-  # print(imdb.name)
-  #annots_path = '/home/hhsu22/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/hhsu22/KITTI/annotations_cache/val_annots.pkl'
-  # print(annots_path, imdb.name)
-  #with open(annots_path, 'rb') as f:
-  #  try:
-  #    recs = pickle.load(f)
-  #  except:
-  #    recs = pickle.load(f, encoding='bytes')
-  #print(recs.keys())
-
-  annots_path = '/home/kevin/Downloads/CityScapes/annotations_cache/cityscapes_annots.pkl' if 'cityscapes' in imdb.name else '/home/kevin/Downloads/KITTI/annotations_cache/val_annots.pkl'
-  
   # extract gt objects for this class
   class_recs = {}
   npos = 0
-  #for imagename in imdb._image_index:
 
-  #  R = [obj for obj in recs[imagename[:imagename.find('leftImg8bit')]] if obj['name'] == 'car']
-
-  #  bbox = np.array([x['bbox'] for x in R])
-  #  difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
-  #  det = [False] * len(R)
-  #  npos = npos + sum(~difficult)
-  #  class_recs[imagename] = {'bbox': bbox,
-  #                           'difficult': difficult,
-  #                           'det': det}
-
-  ovth_objov = 0
-  ovth_objund = 0
-  undth_objov = 0
-  undth_objund = 0
   for i in range(num_images):
     im = cv2.imread(imdb.image_path_at(i))
-    #im = cv2.resize(im, None, fx=2, fy=2)
-    #print(imdb.image_path_at(i))
     _t['im_detect'].tic()
     scores, boxes = im_detect(net, im)
     _t['im_detect'].toc()
@@ -323,65 +275,11 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
           keep = np.where(all_boxes[j][i][:, -1] >= image_thresh)[0]
           all_boxes[j][i] = all_boxes[j][i][keep, :]
           
-    ##all rois(no nms) with scores > 0.5
-    #for j in range(1, imdb.num_classes):
-    #  keep2 = np.where(original_all_boxes[j][i][:, -1] >= 0.)[0]
-    #  print(len(keep2), len(original_all_boxes[j][i][:, -1]))
-    #  original_all_boxes[j][i] = original_all_boxes[j][i][keep2, :]
-    #print(len(original_all_boxes[j][i][:,-1]))
     _t['misc'].toc()
     
     print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
         .format(i + 1, num_images, _t['im_detect'].average_time(),
             _t['misc'].average_time()))
-
-    if vis and gt_roidb:
-      ###ov_th, und_th, gt_left = split_bbox(original_all_boxes[1][i], imdb.image_index[i], class_recs)
-      #print(len(ov_th), len(und_th), len(gt_left))
-      #gt>=0.5
-      if len(ov_th) > 0:
-        bbs = np.where(ov_th[:,-1] >= 0.5)
-        bbs = ov_th[bbs]
-        #print('ov_th, obj>=0.5', len(bbs))
-        ovth_objov += len(bbs)
-        # im_ov_th = draw_car_bb(im, bbs[:,:-1], bbs[:,-1], thr=0.)
-        bbs = np.where(ov_th[:,-1] < 0.5)
-        bbs = ov_th[bbs]
-        #print('ov_th, obj<0.5', len(bbs))
-        ovth_objund += len(bbs)
-        # im_ov_th = draw_car_bb(im_ov_th, bbs[:,:-1], bbs[:,-1], color_type='2', thr=0.)
-      else:
-        im_ov_th = im
-      # cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/indomain_ov_0.5_dets/'+imdb.image_index[i]+'.png', im_ov_th)
-
-      #gt<0.5      
-      bbs = np.where(und_th[:,-1] >= 0.5)
-      bbs = und_th[bbs]
-      #print('und_th, obj>=0.5', len(bbs))
-      undth_objov += len(bbs)
-      # im_und_th = draw_car_bb(im, bbs[:,:-1], bbs[:,-1], thr=0.)
-      bbs = np.where(und_th[:,-1] < 0.5)
-      bbs = und_th[bbs]
-      #print('und_th, obj<0.5', len(bbs))
-      undth_objund += len(bbs)
-      # im_und_th = draw_car_bb(im_und_th, bbs[:,:-1], bbs[:,-1], color_type='2', thr=0.)
-      # cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/indomain_und_0.5_dets/'+imdb.image_index[i]+'.png', im_und_th)
-
-      #gt not found
-      # im_gt_left = draw_car_bb(im, gt_left, color_type='gt')
-      # cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/indomain_gt_notFound/'+imdb.image_index[i]+'.png', im_gt_left)
-
-
-      #draw ground truth boxes
-      # im2show = draw_car_bb(im, gt_roidb[i]['boxes'], color_type='gt')
-
-      #draw detected boxes
-      # im2show = draw_car_bb(im2show, np.squeeze(all_boxes[1][i][:, :-1]), np.squeeze(all_boxes[1][i][:,-1])) #draw class 1: car
-      # cv2.imwrite('/home/disk1/DA/pytorch-faster-rcnn/vis/xx/'+imdb.image_index[i]+'.png', im2show)
-      #cv2.imshow('test', im2show)
-      #cv2.waitKey(0)
-      
-    #if i > 200: break
 
   det_file = os.path.join(output_dir, 'detections.pkl')
   with open(det_file, 'wb') as f:
@@ -389,10 +287,3 @@ def test_net(net, imdb, weights_filename, max_per_image=100, thresh=0.):
 
   print('Evaluating detections')
   imdb.evaluate_detections(all_boxes, output_dir)
-
-  print(ovth_objov/float(num_images), ovth_objund/float(num_images), undth_objov/float(num_images), undth_objund/float(num_images))
-
-  ##
-  #print('without nms')
-  #imdb.evaluate_detections(original_all_boxes, output_dir)
-

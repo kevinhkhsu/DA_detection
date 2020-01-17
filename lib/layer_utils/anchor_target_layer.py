@@ -30,15 +30,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, _feat_stride, all_anch
   height, width = rpn_cls_score.shape[1:3]
 
   # only keep anchors inside the image
-  if not cfg.FPN:
-    inds_inside = np.where(
-      (all_anchors[:, 0] >= -_allowed_border) &
-      (all_anchors[:, 1] >= -_allowed_border) &
-      (all_anchors[:, 2] < im_info[1] + _allowed_border) &  # width
-      (all_anchors[:, 3] < im_info[0] + _allowed_border)  # height
-    )[0]
-  else:
-    inds_inside = np.arange(total_anchors)
+  inds_inside = np.arange(total_anchors)
     
   # keep only inside anchors
   anchors = all_anchors[inds_inside, :]

@@ -4,3 +4,6 @@ fast_rcnn_*
 VOCdevkit*
 coco*
 cache
+KITTI*
+CityScapes*
+bdd100k*

@@ -19,10 +19,6 @@ import subprocess
 import uuid
 from .voc_eval import voc_eval
 from model.config import cfg
-
-import matplotlib.pyplot as plt
-import pylab as pl
-
 import json
 
 class bdd100k(imdb):
@@ -40,6 +36,8 @@ class bdd100k(imdb):
     
     self._devkit_path = self._get_default_path()
     self._data_path = os.path.join(self._devkit_path, 'images', '100k')
+    imset_folder = self._image_set.replace('train', '').replace('val', '')
+
     self._classes = ('__background__',  # always index 0
                      'bike',
                      'bus',
@@ -51,6 +49,7 @@ class bdd100k(imdb):
                      'traffic sign',
                      'train',
                      'truck')
+    
     print('Num Classes:', len(self._classes))
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
     self._image_ext = ''
@@ -272,27 +271,12 @@ class bdd100k(imdb):
       rec, prec, ap, rec_ALL = voc_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
-      # pl.plot(rec, prec, lw=2, 
-      #         label='Precision-recall curve of class {} (ap = {:.4f})'
-      #         ''.format(cls, ap))
       aps += [ap]
-      # rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
 
-    # pl.xlabel('Recall')
-    # pl.ylabel('Precision')
-    # plt.grid(True)
-    # pl.ylim([0.0, 1.05])
-    # pl.xlim([0.0, 1.0])
-    # pl.title('Precision-Recall')
-    # pl.legend(loc="upper right")     
-    # plt.show()
-    # plt.savefig('./pr.png')
-
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
-    # print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:

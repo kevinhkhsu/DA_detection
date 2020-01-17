@@ -18,8 +18,17 @@ cfg = __C
 #
 __C.TRAIN = edict()
 
+#Discriminator lr scalar
+__C.D_lr_mult = 1
+
 # Adapt Lambda
 __C.ADAPT_LAMBDA = 1e-1
+
+#Adaptation task
+#'K2C': KITTI->Cityscapes
+#'C2F': Cityscapes->FoggyCityscapes
+#'C2BDD': Cityscapes->BDD100k_day
+__C.ADAPT_MODE = 'K2C'
 
 # Initial learning rate
 __C.TRAIN.LEARNING_RATE = 0.001
@@ -96,7 +105,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 5000
+__C.TRAIN.SNAPSHOT_ITERS = 10000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
@@ -211,12 +220,6 @@ __C.TEST.MODE = 'nms'
 __C.TEST.RPN_TOP_N = 5000
 
 #
-#FPN
-#
-
-__C.FPN = False
-
-#
 # ResNet options
 #
 
@@ -265,10 +268,8 @@ __C.RNG_SEED = 3
 
 # Root directory of project
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
-#__C.ROOT_DIR = '/media/kevin/Seagate\ Expansion\ Drive/_adapt/'
 # Data directory
-#__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
-__C.DATA_DIR = osp.abspath('/home/kevin/Downloads')
+__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'

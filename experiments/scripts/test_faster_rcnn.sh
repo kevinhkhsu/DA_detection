@@ -45,10 +45,10 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   cityscapes)
-    TRAIN_IMDB="cityscapes_train"
-    TEST_IMDB="cityscapes_val"
+    TRAIN_IMDB="cityscapes_train+cityscapes_val"
+    TEST_IMDB="bdd100k_dayval"
     STEPSIZE="[350000]"
-    ITERS=490000
+    ITERS=110000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
@@ -61,10 +61,10 @@ case ${DATASET} in
     RATIOS="[0.5,1,2]"
     ;;
   bdd100k)
-    TRAIN_IMDB="bdd100k_daytrain"
-    TEST_IMDB="bdd100k_dayval"
+    TRAIN_IMDB="bdd100k_nighttrain"
+    TEST_IMDB="bdd100k_nightval"
     STEPSIZE="[350000]"
-    ITERS=490000
+    ITERS=200000
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
@@ -82,7 +82,7 @@ set +x
 if [[ ! -z  ${EXTRA_ARGS_SLUG}  ]]; then
   NET_FINAL=output/${NET}/${TRAIN_IMDB}/${EXTRA_ARGS_SLUG}/${NET}_faster_rcnn_iter_${ITERS}.pth
 else
-  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_day_iter_${ITERS}.pth
+  NET_FINAL=output/${NET}/${TRAIN_IMDB}/default/${NET}_faster_rcnn_iter_${ITERS}.pth
 fi
 set -x
 

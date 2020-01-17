@@ -22,11 +22,6 @@ from .cityscapes_eval import cityscapes_eval
 from model.config import cfg
 import json
 
-import matplotlib as mpl
-mpl.pyplot.switch_backend('agg')
-import matplotlib.pyplot as plt
-import pylab as pl
-
 class cityscapes(imdb):
   def __init__(self, image_set, use_diff=False):
     name = 'cityscapes' + '_' + image_set
@@ -36,16 +31,39 @@ class cityscapes(imdb):
     self._image_set = image_set
     self._devkit_path = self._get_default_path()
     self._data_path = os.path.join(self._devkit_path)
-    self._classes = ('__background__',  # always index 0
-                     #'person',
-                     #'rider',
+    if 'synthFoggy' in image_set:
+      with open(os.path.join(cfg.ROOT_DIR, "trained_weights/netD_CsynthFoggyC_score.json"), "r") as read_file:
+        self.D_T_score = json.load(read_file)
+    if 'synthBDD' in image_set:
+      with open(os.path.join(cfg.ROOT_DIR, "trained_weights/netD_CsynthBDDday_score.json"), "r") as read_file:
+        self.D_T_score = json.load(read_file)
+    if cfg.ADAPT_MODE == 'K2C':
+      self._classes = ('__background__', 'car')# always index 0
+    elif cfg.ADAPT_MODE == 'C2F':
+      self._classes = ('__background__',  # always index 0
+                     'person',
+                     'rider',
                      'car',
-                     #'truck',
-                     #'bus',
-                     #'train',
-                     #'motorcycle',
-                     #'bicycle'
+                     'truck',
+                     'bus',
+                     'train',
+                     'motorcycle',
+                     'bicycle'
                       )
+    elif cfg.ADAPT_MODE == 'C2BDD':
+      # classes correspond to bdd100k
+      self._classes = ('__background__',  # always index 0
+                      'bicycle',
+                      'bus',
+                      'car',
+                      'motorcycle',
+                      'person',
+                      'rider',
+                      'traffic light',
+                      'traffic sign',
+                      'train',
+                      'truck') 
+    print(self._classes) 
     print('Num Classes:', len(self._classes))
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
     self._image_ext = '.png'
@@ -126,14 +144,14 @@ class cityscapes(imdb):
 
     This function loads/saves from/to a cache file to speed up future calls.
     """
-    cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
+    cache_file = os.path.join(self.cache_path, self.name + '%dclasses'%len(self._classes) +  '_gt_roidb.pkl')
     if os.path.exists(cache_file):
       with open(cache_file, 'rb') as fid:
         try:
           roidb = pickle.load(fid)
         except:
           roidb = pickle.load(fid, encoding='bytes')
-      print('{} gt roidb loaded from {}'.format(self.name, cache_file))
+      print('{} gt roidb loaded from {}'.format(self.name + '%dclasses'%len(self._classes), cache_file))
       return roidb
 
     gt_roidb = [self._load_cityscapes_annotation(index)
@@ -277,7 +295,6 @@ class cityscapes(imdb):
     imagesetfile = self._image_index
     cachedir = os.path.join(self._devkit_path, 'annotations_cache')
     aps = []
-    rc = []
     # The PASCAL VOC metric changed in 2010
     use_07_metric = False#True if int(self._year) < 2010 else False
     print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
@@ -291,27 +308,12 @@ class cityscapes(imdb):
       rec, prec, ap = cityscapes_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
-      pl.plot(rec, prec, lw=2, 
-              label='Precision-recall curve of class {} (ap = {:.4f})'
-              ''.format(cls, ap))
       aps += [ap]
-      rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
 
-    pl.xlabel('Recall')
-    pl.ylabel('Precision')
-    plt.grid(True)
-    pl.ylim([0.0, 1.05])
-    pl.xlim([0.0, 1.0])
-    pl.title('Precision-Recall')
-    pl.legend(loc="upper right")     
-    # plt.show()
-    plt.savefig('./pr/pr.png')
-
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
-    print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:

@@ -20,10 +20,6 @@ import subprocess
 import uuid
 from .voc_eval import voc_eval
 from model.config import cfg
-
-import matplotlib.pyplot as plt
-import pylab as pl
-
 import json
 
 class KITTI(imdb):
@@ -36,9 +32,8 @@ class KITTI(imdb):
     self._image_set = image_set
     self._devkit_path = self._get_default_path()
     self._data_path = os.path.join(self._devkit_path, 'training')
-    with open(os.path.join(self._data_path, "fake_image_2/netD_synthC_score.json"), "r") as read_file:
-      self.cycle_gan_score = json.load(read_file)
-
+    with open(os.path.join(cfg.ROOT_DIR, "trained_weights/netD_synthC_score.json"), "r") as read_file:
+      self.D_T_score = json.load(read_file)
     self._classes = ('__background__',  # always index 0
                      'car')
     self._class_to_ind = dict(list(zip(self.classes, list(range(self.num_classes)))))
@@ -73,11 +68,9 @@ class KITTI(imdb):
     """
     image_path = os.path.join(self._data_path, 'image_2',
                               index + self._image_ext)
-    if self._image_set == 'fake':
-      image_path = os.path.join(self._data_path, 'fake_image_2',
+    if self._image_set == 'synthCity':
+      image_path = os.path.join(self._data_path, 'synthCity_image_2',
                               index + self._image_ext)
-    if self._image_set == 'fakereal':
-      image_path = os.path.join(self._data_path, 'fakereal', index + self._image_ext)
     assert os.path.exists(image_path), \
       'Path does not exist: {}'.format(image_path)
     return image_path
@@ -94,23 +87,6 @@ class KITTI(imdb):
     assert os.path.exists(image_set_file), \
       'Path does not exist: {}'.format(image_set_file)
 
-    ####Threshold score from cycle gan
-    #ll = 7481
-
-    #if self._image_set == 'fake':
-    #  w = np.array(self.cycle_gan_score.values())
-    #  k = np.array(self.cycle_gan_score.keys())
-    #  thres = 0.7 #>0.6: 7405, >0.65: 7297, >0.7: 6997, >0.8: 5973, >0.9:3947
-    #  ll = 6997
-    #  keep = np.nonzero(w>thres)[0]
-    #  assert(keep.size == ll)
-    #  k = k[keep]
-
-    #  with open(image_set_file) as f:
-    #    image_index = [x.strip() for x in f.readlines() if x.strip() in k]
-    #  print(len(image_index))
-
-    #else:
     with open(image_set_file) as f:
       image_index = [x.strip() for x in f.readlines()]
     
@@ -264,7 +240,6 @@ class KITTI(imdb):
       self._image_set + '.txt')
     cachedir = os.path.join(self._devkit_path, 'annotations_cache')
     aps = []
-    rc = []
     # The PASCAL VOC metric changed in 2010
     use_07_metric = False#True if int(self._year) < 2010 else False
     print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
@@ -277,27 +252,12 @@ class KITTI(imdb):
       rec, prec, ap, rec_ALL = voc_eval(
         filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
         use_07_metric=use_07_metric, use_diff=self.config['use_diff'])
-      pl.plot(rec, prec, lw=2, 
-              label='Precision-recall curve of class {} (ap = {:.4f})'
-              ''.format(cls, ap))
       aps += [ap]
-      rc += [rec]
       print(('AP for {} = {:.4f}'.format(cls, ap)))
       with open(os.path.join(output_dir, cls + '_pr.pkl'), 'wb') as f:
         pickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
 
-    pl.xlabel('Recall')
-    pl.ylabel('Precision')
-    plt.grid(True)
-    pl.ylim([0.0, 1.05])
-    pl.xlim([0.0, 1.0])
-    pl.title('Precision-Recall')
-    pl.legend(loc="upper right")     
-    # plt.show()
-    plt.savefig('./pr.png')
-
     print(('Mean AP = {:.4f}'.format(np.mean(aps))))
-    print(('Mean recall = {:.4f}'.format(np.mean(rc))))
     print('~~~~~~~~')
     print('Results:')
     for ap in aps:

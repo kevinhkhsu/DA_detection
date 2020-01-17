@@ -12,7 +12,6 @@ from __future__ import print_function
 
 __sets = {}
 from datasets.pascal_voc import pascal_voc
-from datasets.coco import coco
 from datasets.KITTI import KITTI
 from datasets.cityscapes import cityscapes
 from datasets.bdd100k import bdd100k
@@ -30,31 +29,18 @@ for year in ['2007', '2012']:
     name = 'voc_{}_{}_diff'.format(year, split)
     __sets[name] = (lambda split=split, year=year: pascal_voc(split, year, use_diff=True))
 
-# Set up coco_2014_<split>
-for year in ['2014']:
-  for split in ['train', 'val', 'minival', 'valminusminival', 'trainval']:
-    name = 'coco_{}_{}'.format(year, split)
-    __sets[name] = (lambda split=split, year=year: coco(split, year))
-
-# Set up coco_2015_<split>
-for year in ['2015']:
-  for split in ['test', 'test-dev']:
-    name = 'coco_{}_{}'.format(year, split)
-    __sets[name] = (lambda split=split, year=year: coco(split, year))
-
 # Set up KITTI
-for split in ['train', 'val', 'fake', 'fakereal']:
+for split in ['train', 'val', 'synthCity', 'trainval']:
   name = 'KITTI_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: KITTI(split))
 
 # Set up cityscapes
-for split in ['train', 'val', 'faketrain', 'fakeval', 'foggytrain', 'foggyval', 'synthFoggytrain']:
+for split in ['train', 'val', 'foggytrain', 'foggyval', 'synthFoggytrain', 'synthBDDdaytrain', 'synthBDDdayval']:
   name = 'cityscapes_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: cityscapes(split))
 
 # Set up bdd100k
-for split in ['train', 'val', 'daytrain', 'dayval', 'nighttrain', 'nightval', 'citydaytrain', 'citydayval', 'cleardaytrain', 'cleardayval', 'rainydaytrain', 'rainydayval', \
-              'citydaySynthCityscapestrain', 'citydaySynthCityscapesval', 'daySynthNighttrain', 'daySynthNightval', 'cleardaySynthRainydaytrain', 'cleardaySynthRainydayval']:
+for split in ['train', 'val', 'daytrain', 'dayval', 'nighttrain', 'nightval', 'citydaytrain', 'citydayval', 'cleardaytrain', 'cleardayval', 'rainydaytrain', 'rainydayval']:
   name = 'bdd100k_{}'.format(split)
   __sets[name] = (lambda split=split, year=year: bdd100k(split))
 

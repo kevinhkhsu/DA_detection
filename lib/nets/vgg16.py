@@ -46,7 +46,7 @@ class vgg16(Network):
   def _image_to_head(self):
     net_conv = self._layers['head'](self._image)
     self._act_summaries['conv'] = net_conv
-    
+     
     return net_conv
 
   # def _image_to_head_branch(self):
@@ -64,13 +64,9 @@ class vgg16(Network):
     #load from previous network weight
     netDict = self.state_dict()
     stateDict = {k: v for k, v in state_dict.items() if k in netDict}
-    # stateDict = {k: v for k, v in state_dict.items() if (k in netDict) and ('vgg.features.28' not in k)} #for feature_separate
-    #stateDict = {k: v for k, v in state_dict.items() if (k in netDict) and ('rpn_cls' not in k) and ('rpn_bbox' not in k)} #don't load rpn out net
-    #stateDict = {k: v for k, v in state_dict.items() if (k in netDict) and ('D_' not in k)} #don't load discriminator
     
-    print('load pretrained:', stateDict.keys())
+    #print('load pretrained:', stateDict.keys())
     netDict.update(stateDict)
     nn.Module.load_state_dict(self, netDict)
-    #self.vgg.load_state_dict({k:v for k,v in state_dict.items() if k in self.vgg.state_dict()})
     self.vgg.load_state_dict({k.replace('vgg.', ''):v for k,v in state_dict.items() if k.replace('vgg.', '') in self.vgg.state_dict()}) #loading pretrained vgg.pth
 

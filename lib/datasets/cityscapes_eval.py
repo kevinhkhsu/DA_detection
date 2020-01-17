@@ -24,7 +24,7 @@ def parse_rec(filename):
   for obj in objs:
     obj_struct = {}
     clsName = obj['label']
-    #print clsName
+    #print clsName 
     maxW = float(info['imgWidth']) - 1.
     maxH = float(info['imgHeight']) - 1.
     x1 = maxW
@@ -229,5 +229,5 @@ def cityscapes_eval(detpath,
   # ground truth
   prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
   ap = voc_ap(rec, prec, use_07_metric)
-
+  print(classname, npos)
   return rec, prec, ap

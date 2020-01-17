@@ -1,0 +1,8 @@
+torchvision==0.2.1
+easydict==1.6
+opencv-python==3.4.1.15
+scipy==1.1.0
+pillow==5.1.0
+tensorboardX
+pyyaml==3.12
+tqdm==4.28.1

@@ -39,6 +39,46 @@ case ${DATASET} in
     ANCHORS="[4,8,16,32]"
     RATIOS="[0.5,1,2]"
     ;;
+  KITTI)
+    TRAIN_IMDB="KITTI_train"
+    TEST_IMDB="KITTI_val"
+    STEPSIZE="[50000]"
+    ITERS=70000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
+  cityscapes)
+    TRAIN_IMDB="cityscapes_train+cityscapes_val"
+    TEST_IMDB="cityscapes_val"
+    STEPSIZE="[80000]"
+    ITERS=110000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
+  foggyCity)
+    TRAIN_IMDB="cityscapes_foggytrain"
+    TEST_IMDB="cityscapes_foggyval"
+    STEPSIZE="[80000]"
+    ITERS=110000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
+  bdd100k)
+    TRAIN_IMDB='bdd100k_daytrain'
+    TEST_IMDB='bdd100k_dayval'
+    STEPSIZE="[80000]"
+    ITERS=110000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
+  sim10k)
+    TRAIN_IMDB='sim10k_trainval'
+    TEST_IMDB='sim10k_trainval'
+    STEPSIZE="[50000]"
+    ITERS=70000
+    ANCHORS="[4,8,16,32]"
+    RATIOS="[0.5,1,2]"
+    ;;
   *)
     echo "No dataset given"
     exit
